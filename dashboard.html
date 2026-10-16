@@ -84,13 +84,17 @@ footer.note b{color:var(--text-70)}
 </div>
 
 <div class="wrap hidden" id="app">
-  <div class="banner">ⓘ <b>Changes apply to THIS browser instantly.</b> Visitors see them only after you
-    <b>Export JSON</b> and send it to your developer to publish.</div>
+  <div class="banner">ⓘ <b>Changes apply to THIS browser instantly.</b> Press <b>Publish</b> to save and
+    open the site with your changes. Visitors see them only after you
+    <b>Export JSON</b> and send it to your developer to publish.
+    Tip: open the dashboard and the site from the same place — either both by double-clicking,
+    or both at <b>http://localhost:8099</b> — otherwise you will not see your own edits.</div>
 
   <div class="topbar">
     <h1>Site Dashboard</h1>
     <div class="actions">
-      <button class="btn primary" id="save">Save</button>
+      <button class="btn primary" id="publish">Publish</button>
+      <button class="btn" id="save">Save</button>
       <button class="btn" id="export">Export JSON</button>
       <label class="btn filebtn">Import JSON<input type="file" id="import" accept="application/json,.json"></label>
       <button class="btn danger" id="reset">Reset all</button>
@@ -359,7 +363,12 @@ footer.note b{color:var(--text-70)}
 
     document.getElementById('save').addEventListener('click', function(){
       collectTexts(); persist(); renderTexts(); renderImages(); renderProjects();
-      say('Saved to this browser. Export JSON to publish for all visitors.');
+      say('Saved to this browser. Press Publish to view on the site, Export JSON to publish for all visitors.');
+    });
+    document.getElementById('publish').addEventListener('click', function(){
+      collectTexts(); persist(); renderTexts(); renderImages(); renderProjects();
+      say('Published to this browser — opening the site with your changes…');
+      setTimeout(function(){ window.open('index.html', '_blank'); }, 600);
     });
     document.getElementById('export').addEventListener('click', function(){
       collectTexts(); persist(); renderTexts();
