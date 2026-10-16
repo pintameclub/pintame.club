@@ -102,10 +102,12 @@ footer.note b{color:var(--text-70)}
   <div class="tabs">
     <button id="tabTexts" class="active">Texts</button>
     <button id="tabImages">Images</button>
+    <button id="tabProjects">Projects</button>
   </div>
 
   <div id="textsTab"></div>
   <div id="imagesTab" class="hidden"><div class="imgs" id="imgGrid"></div></div>
+  <div id="projectsTab" class="hidden"></div>
 
   <footer class="note">Honest note: the passcode gate is <b>obfuscation, not real security</b> — anyone who can
     open this file can read its source. It only keeps casual visitors out. Overrides live in this browser's
@@ -151,16 +153,16 @@ footer.note b{color:var(--text-70)}
     var imgBlobs = {};                  /* key -> {dataUrl, w, h, kb} processed but maybe unsaved */
 
     /* ---------- tabs ---------- */
-    var tabTexts = document.getElementById('tabTexts'), tabImages = document.getElementById('tabImages');
-    tabTexts.addEventListener('click', function(){
-      tabTexts.classList.add('active'); tabImages.classList.remove('active');
-      document.getElementById('textsTab').classList.remove('hidden');
-      document.getElementById('imagesTab').classList.add('hidden');
-    });
-    tabImages.addEventListener('click', function(){
-      tabImages.classList.add('active'); tabTexts.classList.remove('active');
-      document.getElementById('imagesTab').classList.remove('hidden');
-      document.getElementById('textsTab').classList.add('hidden');
+    var tabMap = [['tabTexts','textsTab'],['tabImages','imagesTab'],['tabProjects','projectsTab']];
+    function showTab(panelId){
+      tabMap.forEach(function(pair){
+        var on = pair[1] === panelId;
+        document.getElementById(pair[0]).classList.toggle('active', on);
+        document.getElementById(pair[1]).classList.toggle('hidden', !on);
+      });
+    }
+    tabMap.forEach(function(pair){
+      document.getElementById(pair[0]).addEventListener('click', function(){ showTab(pair[1]); });
     });
 
     /* ---------- load index.html ---------- */
@@ -177,7 +179,7 @@ footer.note b{color:var(--text-70)}
         if(el.tagName === 'IMG') imgEls.push({key:key, src:el.getAttribute('src')||'', alt:el.getAttribute('alt')||''});
         else textEls.push({key:key, def:el.textContent.trim()});
       });
-      renderTexts(); renderImages();
+      renderTexts(); renderImages(); renderProjects();
     }).catch(function(err){
       textsTab.innerHTML = '<div class="field">Could not load index.html (' + esc(err.message) + '). ' +
         'Serve this folder over HTTP (e.g. <b>python3 -m http.server</b>) and open dashboard.html from the same server.</div>';
@@ -231,7 +233,7 @@ footer.note b{color:var(--text-70)}
               : '<div class="missing">no file yet — upload one below</div>') +
           '</div>' +
           '<div class="src">current: ' + esc(overrides[im.key] ? 'custom upload (in overrides)' : (im.src || '(none)')) + '</div>' +
-          '<input type="file" accept="image/*">' +
+          '<input type="file" accept="image/*,.avif,.webp">' +
           '<div class="row"><span data-info style="font-size:.78rem;color:var(--text-50);flex:1">' +
             (imgBlobs[im.key] ? esc(imgBlobs[im.key].info) + ' — unsaved' : 'max 1600px wide, JPEG 85%' + (im.key.indexOf('character') !== -1 ? ', PNG kept' : '')) +
           '</span><button class="btn" data-revert>Revert</button></div>';
@@ -244,7 +246,73 @@ footer.note b{color:var(--text-70)}
       });
     }
 
+    /* ---------- projects tab: rename section + titles + AVIF uploads ---------- */
+    var projectsTab = document.getElementById('projectsTab');
+    function findText(key){ return textEls.find(function(f){ return f.key === key; }); }
+    function findImg(key){ return imgEls.find(function(f){ return f.key === key; }); }
+    function renderProjects(){
+      var wm = findText('work.watermark');
+      var html = '<div class="group"><h2>Section name</h2>';
+      if(wm){
+        var wcur = (wm.key in overrides) ? overrides[wm.key] : wm.def;
+        html += '<div class="field" data-key="' + esc(wm.key) + '">' +
+          '<label class="key">' + esc(wm.key) + ((wm.key in overrides) ? ' <b style="color:#ffd9a8">(edited)</b>' : '') + '</label>' +
+          '<div class="def">This is the big background word + section name. Rename it here.</div>' +
+          '<input type="text" data-input value="' + esc(wcur) + '">' +
+          '</div>';
+      } else {
+        html += '<div class="field">Section title key (work.watermark) not found in index.html.</div>';
+      }
+      html += '</div><div class="group"><h2>Project cards <span class="count">4</span></h2><div class="imgs">';
+      for(var n = 1; n <= 4; n++){
+        var t = findText('work.title' + n), im = findImg('work.thumb' + n);
+        var tcur = t ? ((t.key in overrides) ? overrides[t.key] : t.def) : '';
+        var icur = im ? (imgBlobs[im.key] ? imgBlobs[im.key].dataUrl : (overrides[im.key] || im.src)) : '';
+        html += '<div class="imgcard" data-pkey="work.thumb' + n + '">' +
+          '<div class="key">Project ' + n + '</div>' +
+          (t ? '<div class="field" data-key="' + esc(t.key) + '" style="margin-bottom:8px">' +
+            '<label class="key">card title</label>' +
+            '<input type="text" data-input value="' + esc(tcur) + '"></div>' : '') +
+          '<div class="prev">' +
+            (icur ? '<img src="' + esc(icur) + '" alt="" onerror="this.remove()">'
+                  : '<div class="missing">no file yet — upload an AVIF below</div>') +
+          '</div>' +
+          '<div class="src">current: ' + esc(im ? (overrides[im.key] ? 'custom upload (in overrides)' : (im.src || '(none)')) : '(none)') + '</div>' +
+          '<input type="file" data-pfile accept="image/*,.avif,.webp">' +
+          '<div class="row"><span data-info style="font-size:.78rem;color:var(--text-50);flex:1">AVIF kept as-is · JPG/PNG max 1600px</span>' +
+          '<button class="btn" data-prevert>Revert</button></div>' +
+          '</div>';
+      }
+      html += '</div></div>';
+      projectsTab.innerHTML = html;
+      projectsTab.querySelectorAll('.imgcard').forEach(function(card){
+        var key = card.dataset.pkey;
+        var file = card.querySelector('[data-pfile]');
+        file.addEventListener('change', function(){ if(file.files[0]) processFile(key, file.files[0], card); });
+        card.querySelector('[data-prevert]').addEventListener('click', function(){
+          delete imgBlobs[key]; delete overrides[key]; persist(); renderImages(); renderProjects(); say('Reverted ' + key);
+        });
+      });
+    }
+
     function processFile(key, file, card){
+      /* AVIF: canvas cannot encode it, so keep the original bytes (AVIF is tiny anyway) */
+      if(/avif/i.test(file.type) || /\.avif$/i.test(file.name)){
+        if(file.size > 3.5 * 1024 * 1024){ say('That AVIF is over 3.5 MB — compress it first, browser storage is limited.'); return; }
+        var r = new FileReader();
+        r.onload = function(){
+          var dataUrl = r.result;
+          var kb = Math.round(dataUrl.length * 3 / 4 / 1024);
+          imgBlobs[key] = {dataUrl:dataUrl, info:'AVIF original, ' + kb + ' KB'};
+          overrides[key] = dataUrl;
+          card.querySelector('.prev').innerHTML = '<img src="' + dataUrl + '" alt="">';
+          card.querySelector('[data-info]').textContent = imgBlobs[key].info + ' — press Save';
+          say('AVIF ready for ' + key + ' (' + kb + ' KB). Press Save.');
+        };
+        r.onerror = function(){ say('Could not read that AVIF file.'); };
+        r.readAsDataURL(file);
+        return;
+      }
       var url = URL.createObjectURL(file);
       var img = new Image();
       img.onload = function(){
@@ -270,7 +338,7 @@ footer.note b{color:var(--text-70)}
 
     /* ---------- actions ---------- */
     function collectTexts(){
-      textsTab.querySelectorAll('.field').forEach(function(box){
+      document.querySelectorAll('#textsTab .field, #projectsTab .field').forEach(function(box){
         var key = box.dataset.key;
         var val = box.querySelector('[data-input]').value;
         var orig = textEls.find(function(f){ return f.key === key; });
@@ -281,7 +349,7 @@ footer.note b{color:var(--text-70)}
     function persist(){ localStorage.setItem(LS_KEY, JSON.stringify(overrides)); }
 
     document.getElementById('save').addEventListener('click', function(){
-      collectTexts(); persist(); renderTexts(); renderImages();
+      collectTexts(); persist(); renderTexts(); renderImages(); renderProjects();
       say('Saved to this browser. Export JSON to publish for all visitors.');
     });
     document.getElementById('export').addEventListener('click', function(){
@@ -300,14 +368,14 @@ footer.note b{color:var(--text-70)}
           var data = JSON.parse(r.result);
           if(!data || typeof data !== 'object') throw new Error('bad file');
           Object.keys(data).forEach(function(k){ if(typeof data[k] === 'string') overrides[k] = data[k]; });
-          imgBlobs = {}; persist(); renderTexts(); renderImages(); say('Imported — press Save is not needed, already stored.');
+          imgBlobs = {}; persist(); renderTexts(); renderImages(); renderProjects(); say('Imported — press Save is not needed, already stored.');
         }catch(err){ say('Import failed: not a valid overrides JSON.'); }
       };
       r.readAsText(f); e.target.value = '';
     });
     document.getElementById('reset').addEventListener('click', function(){
       if(!confirm('Clear ALL overrides in this browser?')) return;
-      overrides = {}; imgBlobs = {}; persist(); renderTexts(); renderImages(); say('All overrides cleared.');
+      overrides = {}; imgBlobs = {}; persist(); renderTexts(); renderImages(); renderProjects(); say('All overrides cleared.');
     });
     document.getElementById('copy').addEventListener('click', function(){
       collectTexts();
