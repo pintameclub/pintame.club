@@ -287,6 +287,20 @@ textarea{min-height:150px;resize:vertical}
 .links a:hover span{transform:translate(4px,-4px)}
 footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50);font:400 .9rem var(--font-ui);position:relative;z-index:2}
 
+/* ============ LANGUAGE SWITCHER (dark glass pill + dropdown, text codes only) ============ */
+.lang-wrap{position:relative;display:flex;align-items:center}
+.lang-btn{display:flex;align-items:center;gap:8px;padding:9px 15px;border-radius:var(--r-pill);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#fff;font:600 .85rem var(--font-ui);letter-spacing:.08em;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:background .3s}
+.lang-btn:hover{background:rgba(255,255,255,.16)}
+.lang-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.lang-menu{position:absolute;top:calc(100% + 10px);right:0;min-width:196px;background:rgba(12,12,14,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:6px;box-shadow:0 20px 50px rgba(0,0,0,.5);z-index:99}
+.lang-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;color:#fff;font:500 .9rem var(--font-ui);padding:10px 12px;border-radius:9px;cursor:pointer;transition:background .25s}
+.lang-menu button:hover{background:rgba(255,255,255,.1)}
+.lang-menu button .code{font-weight:700;font-size:.8rem;letter-spacing:.08em;min-width:26px;color:var(--text-60)}
+.lang-menu button[aria-selected="true"]{background:rgba(255,255,255,.09)}
+.lang-menu button[aria-selected="true"] .code{color:#fff}
+.lang-menu button .tick{margin-left:auto;font-weight:700;opacity:0}
+.lang-menu button[aria-selected="true"] .tick{opacity:1}
+
 /* ============ RESPONSIVE ============ */
 @media (max-width:900px){
   .projects,.contact-grid,.intro-grid{grid-template-columns:1fr}
@@ -319,6 +333,19 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
       <li><a href="#gallery"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span data-edit="nav.gallery">Gallery</span></a></li>
       <li><a href="#contact"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span data-edit="nav.contact">Contact</span></a></li>
       <li><a href="dashboard.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span data-edit="nav.dashboard">Dashboard</span></a></li>
+      <li class="lang-wrap">
+        <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z"/></svg>
+          <span id="lang-code">EN</span>
+        </button>
+        <div class="lang-menu" id="lang-menu" role="listbox" aria-label="Language" hidden>
+          <button type="button" role="option" data-lang="en" aria-selected="true"><span class="code">EN</span><span class="name">English</span><span class="tick" aria-hidden="true">✓</span></button>
+          <button type="button" role="option" data-lang="pt" aria-selected="false"><span class="code">PT</span><span class="name">Português</span><span class="tick" aria-hidden="true">✓</span></button>
+          <button type="button" role="option" data-lang="es" aria-selected="false"><span class="code">ES</span><span class="name">Español</span><span class="tick" aria-hidden="true">✓</span></button>
+          <button type="button" role="option" data-lang="fr" aria-selected="false"><span class="code">FR</span><span class="name">Français</span><span class="tick" aria-hidden="true">✓</span></button>
+          <button type="button" role="option" data-lang="de" aria-selected="false"><span class="code">DE</span><span class="name">Deutsch</span><span class="tick" aria-hidden="true">✓</span></button>
+        </div>
+      </li>
     </ul>
     <a class="cta" href="#contact" data-edit="nav.cta">Book Meeting</a>
   </nav>
@@ -530,6 +557,557 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 
 <footer class="site"><div class="wrap" data-edit="footer.copy">© 2026 Your Name. All rights reserved.</div></footer>
 
+<script>
+/* pintame i18n: client-side multilingual support (plain HTML/CSS/JS, no libraries).
+   - I18N dictionary keyed by the existing data-edit keys (89 text keys; IMG keys excluded).
+   - applyLocale(lang): for every non-IMG [data-edit], value = dashboard override
+     (localStorage "pintame-overrides-v1") if present, else I18N[lang][key], else I18N.en[key].
+   - [data-count] stat numbers are never touched (labels translate, numbers stay).
+   - [data-split] paragraphs are re-split into words after translation and marked .go
+     immediately so no animation replay weirdness.
+   - This script tag sits BEFORE the main animation script, so its DOMContentLoaded
+     listener runs first: locale is applied before the existing [data-split] splitter.
+   - Never writes to "pintame-overrides-v1": switching language cannot wipe overrides.
+   - Brand name "Pintame Club" is never translated. No flags anywhere: text codes only. */
+(function(){
+  var I18N = {
+    en: {
+      "nav.home": "Home",
+      "nav.work": "Work",
+      "nav.skills": "Skills",
+      "nav.gallery": "Gallery",
+      "nav.contact": "Contact",
+      "nav.dashboard": "Dashboard",
+      "nav.cta": "Book Meeting",
+      "hero.title": "Brand & Product Designer",
+      "hero.bio": "Add a short bio here. Say what you do, who you do it for and how long you have been doing it. Replace this text with your own.",
+      "hero.btn1": "Book Meeting",
+      "hero.btn2": "View Work",
+      "hero.signature": "Pintame Club",
+      "hero.quote": "I turn ideas into meaningful products",
+      "band.logo1": "Logo One",
+      "band.logo2": "LOGO TWO",
+      "band.logo3": "logo3",
+      "band.logo4": "LOGO4",
+      "band.logo5": "logo five",
+      "band.logo6": "Logo Six",
+      "band.logo7": "LOGO SEVEN",
+      "band.logo8": "LOGO EIGHT",
+      "band.title1": "Design that sparks",
+      "band.title2": "engagement and",
+      "band.title3": "inspires action",
+      "band.intro": "Placeholder paragraph. Add a few sentences about your experience, the kinds of clients you work with and how you approach design research and problem solving.",
+      "work.watermark": "Projects",
+      "work.title1": "Project One",
+      "work.title2": "Project Two",
+      "work.title3": "Project Three",
+      "work.title4": "Project Four",
+      "stats.eyebrow": "Learning through every path",
+      "stats.heading": "My 11 years journey",
+      "stats.num1": "0+",
+      "stats.label1": "Websites Done",
+      "stats.num2": "0+",
+      "stats.label2": "Years In Design",
+      "stats.num3": "0+",
+      "stats.label3": "Projects",
+      "stats.num4": "0+",
+      "stats.label4": "Design Awards",
+      "skills.title1": "Web Design",
+      "skills.text1": "Modern, high-performance websites designed to capture attention, communicate clearly and turn visitors into customers.",
+      "skills.title2": "Development",
+      "skills.text2": "Pixel-perfect builds with smooth animations, CMS integration, responsive layouts and performance tuned for a seamless experience.",
+      "skills.title3": "Branding",
+      "skills.text3": "Memorable brand identities with strategic logos, visual systems and a design language that stays consistent across every touchpoint.",
+      "skills.title4": "UI / UX Design",
+      "skills.text4": "Intuitive digital experiences that feel effortless to use, from SaaS platforms to mobile apps and dashboards.",
+      "gallery.title": "Gallery",
+      "gallery.caption1": "Caption One",
+      "gallery.caption2": "Caption Two",
+      "gallery.caption3": "Caption Three",
+      "gallery.caption4": "Caption Four",
+      "gallery.caption5": "Caption Five",
+      "gallery.caption6": "Caption Six",
+      "about.lead": "Hi, I'm Your Name — a brand and product designer who turns ideas into clear, memorable experiences.",
+      "about.body": "Write your story here: where you started, what you learned and what you care about when you design. Mention your experience, the kinds of projects you take on and the clients you have worked with.",
+      "about.tag1": "Web Design",
+      "about.tag2": "Brand Design",
+      "about.tag3": "UI Design",
+      "about.tag4": "Product Design",
+      "about.exp1": "Designer",
+      "about.exp1sub": "Freelance · 2015–Present",
+      "about.exp2": "Role Title",
+      "about.exp2sub": "Company · 2012–2015",
+      "clients.heading": "What Clients Say",
+      "clients.quote1": "Replace with a real client testimonial. Keep it to two or three sentences about the result you delivered.",
+      "clients.name1": "Client Name",
+      "clients.role1": "Role, Company",
+      "faq.watermark": "FAQs",
+      "faq.q1": "What does a project look like?",
+      "faq.a1": "Describe your process: discovery, concepts, feedback rounds and delivery.",
+      "faq.q2": "How is the pricing structure?",
+      "faq.a2": "Explain how you price projects.",
+      "faq.q3": "Are all projects fixed scope?",
+      "faq.a3": "Add your answer here.",
+      "faq.q4": "What is the ROI?",
+      "faq.a4": "Add your answer here.",
+      "faq.q5": "How do we measure success?",
+      "faq.a5": "Add your answer here.",
+      "faq.q6": "What do I need to get started?",
+      "faq.a6": "Add your answer here.",
+      "contact.title": "Contact",
+      "contact.submit": "Submit",
+      "contact.email": "hello@example.com",
+      "contact.ig": "Instagram",
+      "contact.li": "LinkedIn",
+      "contact.dr": "Dribbble",
+      "footer.copy": "© 2026 Your Name. All rights reserved."
+    },
+    pt: {
+      "nav.home": "Início",
+      "nav.work": "Trabalhos",
+      "nav.skills": "Habilidades",
+      "nav.gallery": "Galeria",
+      "nav.contact": "Contato",
+      "nav.dashboard": "Dashboard",
+      "nav.cta": "Agendar reunião",
+      "hero.title": "Designer de Marca e Produto",
+      "hero.bio": "Escreva uma breve bio aqui. Diga o que você faz, para quem faz e há quanto tempo faz. Substitua este texto pelo seu.",
+      "hero.btn1": "Agendar reunião",
+      "hero.btn2": "Ver trabalhos",
+      "hero.signature": "Pintame Club",
+      "hero.quote": "Transformo ideias em produtos com significado",
+      "band.logo1": "Logo One",
+      "band.logo2": "LOGO TWO",
+      "band.logo3": "logo3",
+      "band.logo4": "LOGO4",
+      "band.logo5": "logo five",
+      "band.logo6": "Logo Six",
+      "band.logo7": "LOGO SEVEN",
+      "band.logo8": "LOGO EIGHT",
+      "band.title1": "Design que desperta",
+      "band.title2": "engajamento e",
+      "band.title3": "inspira ação",
+      "band.intro": "Parágrafo de exemplo. Escreva algumas frases sobre sua experiência, os tipos de clientes com quem trabalha e como você aborda pesquisa e solução de problemas em design.",
+      "work.watermark": "Projetos",
+      "work.title1": "Projeto Um",
+      "work.title2": "Projeto Dois",
+      "work.title3": "Projeto Três",
+      "work.title4": "Projeto Quatro",
+      "stats.eyebrow": "Aprendendo em cada caminho",
+      "stats.heading": "Minha jornada de 11 anos",
+      "stats.num1": "0+",
+      "stats.label1": "Sites entregues",
+      "stats.num2": "0+",
+      "stats.label2": "Anos de design",
+      "stats.num3": "0+",
+      "stats.label3": "Projetos",
+      "stats.num4": "0+",
+      "stats.label4": "Prêmios de design",
+      "skills.title1": "Design de sites",
+      "skills.text1": "Sites modernos e rápidos, feitos para chamar atenção, comunicar com clareza e transformar visitantes em clientes.",
+      "skills.title2": "Desenvolvimento",
+      "skills.text2": "Sites fiéis ao layout, com animações suaves, CMS, layouts responsivos e performance ajustada para uma experiência perfeita.",
+      "skills.title3": "Branding",
+      "skills.text3": "Identidades de marca marcantes, com logos estratégicos, sistemas visuais e uma linguagem consistente em cada ponto de contato.",
+      "skills.title4": "Design UI / UX",
+      "skills.text4": "Experiências digitais intuitivas e fáceis de usar, de plataformas SaaS a apps e painéis.",
+      "gallery.title": "Galeria",
+      "gallery.caption1": "Legenda Um",
+      "gallery.caption2": "Legenda Dois",
+      "gallery.caption3": "Legenda Três",
+      "gallery.caption4": "Legenda Quatro",
+      "gallery.caption5": "Legenda Cinco",
+      "gallery.caption6": "Legenda Seis",
+      "about.lead": "Olá, sou Seu Nome — designer de marca e produto que transforma ideias em experiências claras e memoráveis.",
+      "about.body": "Escreva sua história aqui: onde começou, o que aprendeu e o que importa para você ao projetar. Fale da sua experiência, dos projetos que aceita e dos clientes com quem trabalhou.",
+      "about.tag1": "Design de sites",
+      "about.tag2": "Design de marca",
+      "about.tag3": "Design de interfaces",
+      "about.tag4": "Design de produto",
+      "about.exp1": "Designer",
+      "about.exp1sub": "Autônomo · 2015–Presente",
+      "about.exp2": "Cargo",
+      "about.exp2sub": "Empresa · 2012–2015",
+      "clients.heading": "O que dizem os clientes",
+      "clients.quote1": "Substitua por um depoimento real. Escreva duas ou três frases sobre o resultado que você entregou.",
+      "clients.name1": "Nome do cliente",
+      "clients.role1": "Cargo, Empresa",
+      "faq.watermark": "FAQs",
+      "faq.q1": "Como é um projeto?",
+      "faq.a1": "Descreva seu processo: descoberta, conceitos, rodadas de feedback e entrega.",
+      "faq.q2": "Como funciona o preço?",
+      "faq.a2": "Explique como você precifica os projetos.",
+      "faq.q3": "Todos os projetos têm escopo fechado?",
+      "faq.a3": "Escreva sua resposta aqui.",
+      "faq.q4": "Qual é o ROI?",
+      "faq.a4": "Escreva sua resposta aqui.",
+      "faq.q5": "Como medimos o sucesso?",
+      "faq.a5": "Escreva sua resposta aqui.",
+      "faq.q6": "O que preciso para começar?",
+      "faq.a6": "Escreva sua resposta aqui.",
+      "contact.title": "Contato",
+      "contact.submit": "Enviar",
+      "contact.email": "hello@example.com",
+      "contact.ig": "Instagram",
+      "contact.li": "LinkedIn",
+      "contact.dr": "Dribbble",
+      "footer.copy": "© 2026 Seu Nome. Todos os direitos reservados."
+    },
+    es: {
+      "nav.home": "Inicio",
+      "nav.work": "Trabajos",
+      "nav.skills": "Habilidades",
+      "nav.gallery": "Galería",
+      "nav.contact": "Contacto",
+      "nav.dashboard": "Dashboard",
+      "nav.cta": "Reservar reunión",
+      "hero.title": "Diseñador de marca y producto",
+      "hero.bio": "Escribe una breve bio aquí. Cuenta qué haces, para quién lo haces y desde cuándo. Reemplaza este texto con el tuyo.",
+      "hero.btn1": "Reservar reunión",
+      "hero.btn2": "Ver trabajos",
+      "hero.signature": "Pintame Club",
+      "hero.quote": "Convierto ideas en productos con sentido",
+      "band.logo1": "Logo One",
+      "band.logo2": "LOGO TWO",
+      "band.logo3": "logo3",
+      "band.logo4": "LOGO4",
+      "band.logo5": "logo five",
+      "band.logo6": "Logo Six",
+      "band.logo7": "LOGO SEVEN",
+      "band.logo8": "LOGO EIGHT",
+      "band.title1": "Diseño que despierta",
+      "band.title2": "interacción e",
+      "band.title3": "inspira acción",
+      "band.intro": "Párrafo de ejemplo. Escribe unas frases sobre tu experiencia, los clientes con los que trabajas y cómo abordas la investigación y la resolución de problemas en diseño.",
+      "work.watermark": "Proyectos",
+      "work.title1": "Proyecto Uno",
+      "work.title2": "Proyecto Dos",
+      "work.title3": "Proyecto Tres",
+      "work.title4": "Proyecto Cuatro",
+      "stats.eyebrow": "Aprendiendo en cada camino",
+      "stats.heading": "Mi viaje de 11 años",
+      "stats.num1": "0+",
+      "stats.label1": "Sitios web realizados",
+      "stats.num2": "0+",
+      "stats.label2": "Años de diseño",
+      "stats.num3": "0+",
+      "stats.label3": "Proyectos",
+      "stats.num4": "0+",
+      "stats.label4": "Premios de diseño",
+      "skills.title1": "Diseño web",
+      "skills.text1": "Sitios modernos y rápidos, diseñados para captar la atención, comunicar con claridad y convertir visitantes en clientes.",
+      "skills.title2": "Desarrollo",
+      "skills.text2": "Sitios fieles al diseño, con animaciones suaves, CMS, diseños adaptables y rendimiento optimizado para una experiencia perfecta.",
+      "skills.title3": "Branding",
+      "skills.text3": "Identidades de marca memorables, con logos estratégicos, sistemas visuales y un lenguaje coherente en cada punto de contacto.",
+      "skills.title4": "Diseño UI / UX",
+      "skills.text4": "Experiencias digitales intuitivas y fáciles de usar, desde plataformas SaaS hasta apps y paneles.",
+      "gallery.title": "Galería",
+      "gallery.caption1": "Leyenda Uno",
+      "gallery.caption2": "Leyenda Dos",
+      "gallery.caption3": "Leyenda Tres",
+      "gallery.caption4": "Leyenda Cuatro",
+      "gallery.caption5": "Leyenda Cinco",
+      "gallery.caption6": "Leyenda Seis",
+      "about.lead": "Hola, soy Tu Nombre — diseñador de marca y producto que convierte ideas en experiencias claras y memorables.",
+      "about.body": "Escribe tu historia aquí: dónde empezaste, qué aprendiste y qué te importa al diseñar. Menciona tu experiencia, los proyectos que aceptas y los clientes con los que has trabajado.",
+      "about.tag1": "Diseño web",
+      "about.tag2": "Diseño de marca",
+      "about.tag3": "Diseño de interfaces",
+      "about.tag4": "Diseño de producto",
+      "about.exp1": "Diseñador",
+      "about.exp1sub": "Freelance · 2015–Presente",
+      "about.exp2": "Puesto",
+      "about.exp2sub": "Empresa · 2012–2015",
+      "clients.heading": "Lo que dicen los clientes",
+      "clients.quote1": "Reemplaza con un testimonio real. Escríbelo en dos o tres frases sobre el resultado que entregaste.",
+      "clients.name1": "Nombre del cliente",
+      "clients.role1": "Puesto, Empresa",
+      "faq.watermark": "FAQs",
+      "faq.q1": "¿Cómo es un proyecto?",
+      "faq.a1": "Describe tu proceso: descubrimiento, conceptos, rondas de feedback y entrega.",
+      "faq.q2": "¿Cómo es la estructura de precios?",
+      "faq.a2": "Explica cómo pones precio a los proyectos.",
+      "faq.q3": "¿Todos los proyectos son de alcance fijo?",
+      "faq.a3": "Escribe tu respuesta aquí.",
+      "faq.q4": "¿Cuál es el ROI?",
+      "faq.a4": "Escribe tu respuesta aquí.",
+      "faq.q5": "¿Cómo medimos el éxito?",
+      "faq.a5": "Escribe tu respuesta aquí.",
+      "faq.q6": "¿Qué necesito para empezar?",
+      "faq.a6": "Escribe tu respuesta aquí.",
+      "contact.title": "Contacto",
+      "contact.submit": "Enviar",
+      "contact.email": "hello@example.com",
+      "contact.ig": "Instagram",
+      "contact.li": "LinkedIn",
+      "contact.dr": "Dribbble",
+      "footer.copy": "© 2026 Tu Nombre. Todos los derechos reservados."
+    },
+    fr: {
+      "nav.home": "Accueil",
+      "nav.work": "Réalisations",
+      "nav.skills": "Compétences",
+      "nav.gallery": "Galerie",
+      "nav.contact": "Contact",
+      "nav.dashboard": "Dashboard",
+      "nav.cta": "Réserver un appel",
+      "hero.title": "Designer marque & produit",
+      "hero.bio": "Écrivez une courte bio ici. Dites ce que vous faites, pour qui et depuis quand. Remplacez ce texte par le vôtre.",
+      "hero.btn1": "Réserver un appel",
+      "hero.btn2": "Voir les projets",
+      "hero.signature": "Pintame Club",
+      "hero.quote": "Je transforme les idées en produits porteurs de sens",
+      "band.logo1": "Logo One",
+      "band.logo2": "LOGO TWO",
+      "band.logo3": "logo3",
+      "band.logo4": "LOGO4",
+      "band.logo5": "logo five",
+      "band.logo6": "Logo Six",
+      "band.logo7": "LOGO SEVEN",
+      "band.logo8": "LOGO EIGHT",
+      "band.title1": "Un design qui éveille",
+      "band.title2": "l’engagement et",
+      "band.title3": "inspire l’action",
+      "band.intro": "Paragraphe d’exemple. Écrivez quelques phrases sur votre expérience, vos clients et votre approche de la recherche et de la résolution de problèmes en design.",
+      "work.watermark": "Projets",
+      "work.title1": "Projet Un",
+      "work.title2": "Projet Deux",
+      "work.title3": "Projet Trois",
+      "work.title4": "Projet Quatre",
+      "stats.eyebrow": "Apprendre à chaque étape",
+      "stats.heading": "Mon parcours de 11 ans",
+      "stats.num1": "0+",
+      "stats.label1": "Sites web réalisés",
+      "stats.num2": "0+",
+      "stats.label2": "Années de design",
+      "stats.num3": "0+",
+      "stats.label3": "Projets",
+      "stats.num4": "0+",
+      "stats.label4": "Prix de design",
+      "skills.title1": "Webdesign",
+      "skills.text1": "Des sites modernes et rapides, conçus pour capter l’attention, communiquer clairement et convertir les visiteurs en clients.",
+      "skills.title2": "Développement",
+      "skills.text2": "Des sites fidèles aux maquettes, avec des animations fluides, un CMS, des layouts responsives et des performances soignées.",
+      "skills.title3": "Branding",
+      "skills.text3": "Des identités de marque mémorables, avec des logos stratégiques, des systèmes visuels et un langage cohérent sur chaque point de contact.",
+      "skills.title4": "Design UI / UX",
+      "skills.text4": "Des expériences numériques intuitives et simples, des plateformes SaaS aux apps mobiles et tableaux de bord.",
+      "gallery.title": "Galerie",
+      "gallery.caption1": "Légende Un",
+      "gallery.caption2": "Légende Deux",
+      "gallery.caption3": "Légende Trois",
+      "gallery.caption4": "Légende Quatre",
+      "gallery.caption5": "Légende Cinq",
+      "gallery.caption6": "Légende Six",
+      "about.lead": "Bonjour, je suis Votre Nom — designer marque et produit, je transforme les idées en expériences claires et mémorables.",
+      "about.body": "Écrivez votre histoire ici : vos débuts, vos apprentissages et ce qui compte pour vous en design. Mentionnez votre expérience, vos projets et vos clients.",
+      "about.tag1": "Webdesign",
+      "about.tag2": "Design de marque",
+      "about.tag3": "Design d’interfaces",
+      "about.tag4": "Design produit",
+      "about.exp1": "Designer",
+      "about.exp1sub": "Freelance · 2015–Présent",
+      "about.exp2": "Poste",
+      "about.exp2sub": "Entreprise · 2012–2015",
+      "clients.heading": "Ce que disent les clients",
+      "clients.quote1": "Remplacez par un vrai témoignage client. Deux ou trois phrases sur le résultat obtenu.",
+      "clients.name1": "Nom du client",
+      "clients.role1": "Poste, Entreprise",
+      "faq.watermark": "FAQs",
+      "faq.q1": "À quoi ressemble un projet ?",
+      "faq.a1": "Décrivez votre méthode : découverte, concepts, retours et livraison.",
+      "faq.q2": "Comment sont fixés les prix ?",
+      "faq.a2": "Expliquez comment vous tarifiez vos projets.",
+      "faq.q3": "Tous les projets sont-ils au forfait ?",
+      "faq.a3": "Écrivez votre réponse ici.",
+      "faq.q4": "Quel est le ROI ?",
+      "faq.a4": "Écrivez votre réponse ici.",
+      "faq.q5": "Comment mesure-t-on le succès ?",
+      "faq.a5": "Écrivez votre réponse ici.",
+      "faq.q6": "Que faut-il pour commencer ?",
+      "faq.a6": "Écrivez votre réponse ici.",
+      "contact.title": "Contact",
+      "contact.submit": "Envoyer",
+      "contact.email": "hello@example.com",
+      "contact.ig": "Instagram",
+      "contact.li": "LinkedIn",
+      "contact.dr": "Dribbble",
+      "footer.copy": "© 2026 Votre Nom. Tous droits réservés."
+    },
+    de: {
+      "nav.home": "Start",
+      "nav.work": "Arbeiten",
+      "nav.skills": "Leistungen",
+      "nav.gallery": "Galerie",
+      "nav.contact": "Kontakt",
+      "nav.dashboard": "Dashboard",
+      "nav.cta": "Termin buchen",
+      "hero.title": "Marken- & Produktdesigner",
+      "hero.bio": "Füge hier eine kurze Bio ein. Sag, was du machst, für wen und seit wann. Ersetze diesen Text durch deinen eigenen.",
+      "hero.btn1": "Termin buchen",
+      "hero.btn2": "Arbeiten ansehen",
+      "hero.signature": "Pintame Club",
+      "hero.quote": "Ich verwandle Ideen in bedeutungsvolle Produkte",
+      "band.logo1": "Logo One",
+      "band.logo2": "LOGO TWO",
+      "band.logo3": "logo3",
+      "band.logo4": "LOGO4",
+      "band.logo5": "logo five",
+      "band.logo6": "Logo Six",
+      "band.logo7": "LOGO SEVEN",
+      "band.logo8": "LOGO EIGHT",
+      "band.title1": "Design, das begeistert",
+      "band.title2": "Engagement weckt und",
+      "band.title3": "zum Handeln inspiriert",
+      "band.intro": "Beispielabsatz. Schreibe ein paar Sätze über deine Erfahrung, deine Kunden und wie du Recherche und Problemlösung im Design angehst.",
+      "work.watermark": "Projekte",
+      "work.title1": "Projekt Eins",
+      "work.title2": "Projekt Zwei",
+      "work.title3": "Projekt Drei",
+      "work.title4": "Projekt Vier",
+      "stats.eyebrow": "Lernen auf jedem Weg",
+      "stats.heading": "Meine 11-jährige Reise",
+      "stats.num1": "0+",
+      "stats.label1": "Fertige Websites",
+      "stats.num2": "0+",
+      "stats.label2": "Jahre Design-Erfahrung",
+      "stats.num3": "0+",
+      "stats.label3": "Projekte",
+      "stats.num4": "0+",
+      "stats.label4": "Designpreise",
+      "skills.title1": "Webdesign",
+      "skills.text1": "Moderne, schnelle Websites, die Aufmerksamkeit wecken, klar kommunizieren und Besucher in Kunden verwandeln.",
+      "skills.title2": "Entwicklung",
+      "skills.text2": "Pixelgenaue Umsetzung mit smoothen Animationen, CMS, responsiven Layouts und optimierter Performance für ein reibungsloses Erlebnis.",
+      "skills.title3": "Branding",
+      "skills.text3": "Einprägsame Markenidentitäten mit strategischen Logos, visuellen Systemen und konsistenter Gestaltung an jedem Touchpoint.",
+      "skills.title4": "UI-/UX-Design",
+      "skills.text4": "Intuitive digitale Erlebnisse, die sich mühelos anfühlen — von SaaS-Plattformen bis zu Apps und Dashboards.",
+      "gallery.title": "Galerie",
+      "gallery.caption1": "Bild Eins",
+      "gallery.caption2": "Bild Zwei",
+      "gallery.caption3": "Bild Drei",
+      "gallery.caption4": "Bild Vier",
+      "gallery.caption5": "Bild Fünf",
+      "gallery.caption6": "Bild Sechs",
+      "about.lead": "Hi, ich bin Dein Name — Marken- und Produktdesigner, der Ideen in klare, einprägsame Erlebnisse verwandelt.",
+      "about.body": "Schreibe hier deine Geschichte: wo du angefangen hast, was du gelernt hast und was dir beim Designen wichtig ist. Erwähne Erfahrung, Projekte und Kunden.",
+      "about.tag1": "Webdesign",
+      "about.tag2": "Markendesign",
+      "about.tag3": "Interface-Design",
+      "about.tag4": "Produktdesign",
+      "about.exp1": "Designer",
+      "about.exp1sub": "Freiberuflich · 2015–Heute",
+      "about.exp2": "Position",
+      "about.exp2sub": "Firma · 2012–2015",
+      "clients.heading": "Was Kunden sagen",
+      "clients.quote1": "Durch ein echtes Kundenfeedback ersetzen. Zwei bis drei Sätze über das gelieferte Ergebnis.",
+      "clients.name1": "Kundenname",
+      "clients.role1": "Position, Firma",
+      "faq.watermark": "FAQs",
+      "faq.q1": "Wie sieht ein Projekt aus?",
+      "faq.a1": "Beschreibe deinen Prozess: Recherche, Konzepte, Feedbackrunden und Lieferung.",
+      "faq.q2": "Wie sind die Preise aufgebaut?",
+      "faq.a2": "Erkläre, wie du Projekte kalkulierst.",
+      "faq.q3": "Sind alle Projekte Festpreisprojekte?",
+      "faq.a3": "Schreibe deine Antwort hier.",
+      "faq.q4": "Wie hoch ist der ROI?",
+      "faq.a4": "Schreibe deine Antwort hier.",
+      "faq.q5": "Wie messen wir Erfolg?",
+      "faq.a5": "Schreibe deine Antwort hier.",
+      "faq.q6": "Was brauche ich für den Start?",
+      "faq.a6": "Schreibe deine Antwort hier.",
+      "contact.title": "Kontakt",
+      "contact.submit": "Senden",
+      "contact.email": "hello@example.com",
+      "contact.ig": "Instagram",
+      "contact.li": "LinkedIn",
+      "contact.dr": "Dribbble",
+      "footer.copy": "© 2026 Dein Name. Alle Rechte vorbehalten."
+    }
+  };
+
+  function getOverrides(){
+    try{
+      var raw = localStorage.getItem("pintame-overrides-v1");
+      if(!raw) return {};
+      var data = JSON.parse(raw);
+      return (data && typeof data === "object") ? data : {};
+    }catch(e){ return {}; }
+  }
+
+  function currentLang(){
+    try{
+      var l = localStorage.getItem("pintame-locale");
+      if(l && I18N[l]) return l;
+    }catch(e){}
+    return "en";
+  }
+
+  function esc(w){
+    return w.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  /* same word-split markup as the main script; marks .go immediately */
+  function splitWords(el){
+    var txt = el.textContent.trim();
+    if(!txt) return;
+    el.setAttribute("aria-label", txt);
+    var words = txt.split(/\s+/);
+    el.innerHTML = words.map(function(w, i){
+      return '<span class="w" aria-hidden="true"><span style="--i:' + i + '">' + esc(w) + "</span></span>";
+    }).join(" ");
+    el.classList.add("go");
+  }
+
+  function syncSwitcher(lang){
+    var codeEl = document.getElementById("lang-code");
+    if(codeEl) codeEl.textContent = lang.toUpperCase();
+    var menu = document.getElementById("lang-menu");
+    if(!menu) return;
+    menu.querySelectorAll("[data-lang]").forEach(function(opt){
+      opt.setAttribute("aria-selected", opt.getAttribute("data-lang") === lang ? "true" : "false");
+    });
+  }
+
+  function applyLocale(lang){
+    if(!I18N[lang]) lang = "en";
+    var ov = getOverrides();
+    document.querySelectorAll("[data-edit]").forEach(function(el){
+      if(el.tagName === "IMG") return;
+      if(el.hasAttribute("data-count")) return; /* stat numbers stay numeric */
+      var key = el.getAttribute("data-edit");
+      var v = (key in ov) ? ov[key] : (I18N[lang][key] || I18N.en[key]);
+      if(typeof v !== "string" || !v) return;
+      el.textContent = v;
+    });
+    document.querySelectorAll("[data-split]").forEach(splitWords);
+    document.documentElement.lang = lang;
+    try{ localStorage.setItem("pintame-locale", lang); }catch(e){}
+    syncSwitcher(lang);
+  }
+
+  /* switcher UI wiring (nav is parsed before this script, so elements exist now) */
+  var btn = document.getElementById("lang-btn");
+  var menu = document.getElementById("lang-menu");
+  function isOpen(){ return menu && !menu.hasAttribute("hidden"); }
+  function openMenu(){ menu.removeAttribute("hidden"); btn.setAttribute("aria-expanded", "true"); }
+  function closeMenu(){ if(isOpen()){ menu.setAttribute("hidden", ""); btn.setAttribute("aria-expanded", "false"); } }
+  if(btn && menu){
+    btn.addEventListener("click", function(e){ e.stopPropagation(); if(isOpen()) closeMenu(); else openMenu(); });
+    document.addEventListener("click", function(e){ if(isOpen() && !e.target.closest(".lang-wrap")) closeMenu(); });
+    document.addEventListener("keydown", function(e){ if(e.key === "Escape" && isOpen()){ closeMenu(); btn.focus(); } });
+    menu.querySelectorAll("[data-lang]").forEach(function(opt){
+      opt.addEventListener("click", function(){ applyLocale(opt.getAttribute("data-lang")); closeMenu(); });
+    });
+  }
+
+  /* registered BEFORE the main animation script's listener: locale first, splitter second */
+  document.addEventListener("DOMContentLoaded", function(){ applyLocale(currentLang()); });
+  window.pintameApplyLocale = applyLocale;
+})();
+</script>
 <script>
 (function(){
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
