@@ -107,15 +107,18 @@ nav ul a.active{background:rgba(235,235,235,.92);color:#222}
     radial-gradient(55% 55% at 0% 62%,rgba(255,96,24,.7) 0,transparent 72%),
     radial-gradient(120% 60% at 55% 112%,#ff5f22 0,#ff3d1f 40%,transparent 75%),
     #0a0507}
-/* portrait stage: your image, with the PINTAME CLUB name layered on top of it */
-.stage{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:90%;aspect-ratio:864/1245;max-width:92vw;z-index:3}
+/* portrait stage: your image, with the PINTAME CLUB name layered on top of it.
+   The whole stage stays hidden until hero.jpg actually loads (a broken
+   image paints an ugly gray box), so .has-img is toggled by onload/onerror. */
+.stage{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:90%;aspect-ratio:864/1245;max-width:92vw;z-index:3;display:none}
+.stage.has-img{display:block}
 .stage img{width:100%;height:100%;object-fit:cover;display:block;border-radius:6px 6px 0 0;
   -webkit-mask-image:linear-gradient(180deg,#000 72%,transparent 99%);mask-image:linear-gradient(180deg,#000 72%,transparent 99%);
   filter:drop-shadow(0 20px 60px rgba(0,0,0,.35))}
 /* big name: letters sway left/right slowly; the letters near the middle are faded but still readable.
    Fade each letter with --o (0 = invisible, 1 = solid). Speed: change 7s in .sw. Distance: change .14em in @keyframes sway. */
 .name{position:absolute;left:50%;top:7%;transform:translateX(-50%);z-index:5;display:flex;align-items:baseline;white-space:nowrap;
-  font:700 clamp(3.2rem,12.6vw,15.5rem)/1 var(--font-display);letter-spacing:-.04em;color:#fff;pointer-events:none;text-shadow:0 6px 40px rgba(0,0,0,.25)}
+  font:700 clamp(2.4rem,9.5vw,13rem)/1 var(--font-display);letter-spacing:-.04em;color:#fff;pointer-events:none;text-shadow:0 6px 40px rgba(0,0,0,.25)}
 .name .gap{display:inline-block;width:.3em}
 .name .ch{display:inline-block;opacity:0;animation:chin 1s var(--ease) forwards;animation-delay:calc(var(--i) * 70ms + 150ms)}
 .name .sw{display:inline-block;animation:sway 7s ease-in-out infinite;animation-delay:calc(var(--i) * -.55s)}
@@ -326,7 +329,7 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 <!-- HERO -->
 <section id="hero">
   <div class="stage">
-    <img data-edit="hero.portrait" src="images/hero.jpg" alt="Portrait" width="864" height="1245" fetchpriority="high" onerror="this.style.display='none'">
+    <img data-edit="hero.portrait" src="images/hero.jpg" alt="Portrait" width="864" height="1245" fetchpriority="high" onload="this.closest('.stage').classList.add('has-img')" onerror="this.closest('.stage').classList.remove('has-img')">
     <!-- PINTAME CLUB: --o is each letter's opacity (M, E, C, L are faded so the portrait shows through) -->
     <div class="name" role="img" aria-label="PINTAME CLUB">
       <span class="ch" style="--i:0;--o:1" aria-hidden="true"><span class="sw">P</span></span>
