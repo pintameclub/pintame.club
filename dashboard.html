@@ -150,8 +150,22 @@ footer.note b{color:var(--text-70)}
     function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     function loadOverrides(){
-      try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') || {}; }
+      try { return JSON.parse(storeGet() || '{}') || {}; }
       catch(e){ return {}; }
+    }
+    /* storage that never throws: falls back to memory + tells the user */
+    var __mem = {};
+    var storeOK = true;
+    try{ localStorage.setItem('__pintame_t', '1'); localStorage.removeItem('__pintame_t'); }
+    catch(e){ storeOK = false; }
+    function storeGet(){
+      if(storeOK){ try{ return localStorage.getItem(LS_KEY); }catch(e){ return __mem[LS_KEY] || null; } }
+      return __mem[LS_KEY] || null;
+    }
+    function storeSet(v){
+      if(!storeOK){ __mem[LS_KEY] = v; return 'memory'; }
+      try{ localStorage.setItem(LS_KEY, v); return 'ok'; }
+      catch(e){ return 'quota'; }
     }
     var overrides = loadOverrides();   /* key -> string (text or dataURL) */
     var imgBlobs = {};                  /* key -> {dataUrl, w, h, kb} processed but maybe unsaved */
@@ -246,12 +260,17 @@ footer.note b{color:var(--text-70)}
               : '<div class="missing">no file yet — upload one below</div>') +
           '</div>' +
           '<div class="src">current: ' + esc(overrides[im.key] ? 'custom upload (in overrides)' : (im.src || '(none)')) + '</div>' +
-          '<input type="file" accept="image/*,.avif,.webp">' +
+          '<label class="btn filebtn">Choose file<input type="file" accept="image/*,.avif,.webp"></label>' +
+          '<div class="src" data-fname>no file chosen yet</div>' +
           '<div class="row"><span data-info style="font-size:.78rem;color:var(--text-50);flex:1">' +
             (imgBlobs[im.key] ? esc(imgBlobs[im.key].info) + ' — unsaved' : 'max 1600px wide, JPEG 85%' + (im.key.indexOf('character') !== -1 ? ', PNG kept' : '')) +
           '</span><button class="btn" data-revert>Revert</button></div>';
         var file = card.querySelector('input[type=file]');
-        file.addEventListener('change', function(){ if(file.files[0]) processFile(im.key, file.files[0], card); });
+        file.addEventListener('change', function(){
+          if(!file.files[0]) return;
+          card.querySelector('[data-fname]').textContent = file.files[0].name;
+          processFile(im.key, file.files[0], card);
+        });
         card.querySelector('[data-revert]').addEventListener('click', function(){
           delete imgBlobs[im.key]; delete overrides[im.key]; persist(); renderImages(); say('Reverted ' + im.key);
         });
@@ -291,7 +310,8 @@ footer.note b{color:var(--text-70)}
                   : '<div class="missing">no file yet — upload an AVIF below</div>') +
           '</div>' +
           '<div class="src">current: ' + esc(im ? (overrides[im.key] ? 'custom upload (in overrides)' : (im.src || '(none)')) : '(none)') + '</div>' +
-          '<input type="file" data-pfile accept="image/*,.avif,.webp">' +
+          '<label class="btn filebtn">Choose file<input type="file" data-pfile accept="image/*,.avif,.webp"></label>' +
+          '<div class="src" data-fname>no file chosen yet</div>' +
           '<div class="row"><span data-info style="font-size:.78rem;color:var(--text-50);flex:1">AVIF kept as-is · JPG/PNG max 1600px</span>' +
           '<button class="btn" data-prevert>Revert</button></div>' +
           '</div>';
@@ -301,7 +321,11 @@ footer.note b{color:var(--text-70)}
       projectsTab.querySelectorAll('.imgcard').forEach(function(card){
         var key = card.dataset.pkey;
         var file = card.querySelector('[data-pfile]');
-        file.addEventListener('change', function(){ if(file.files[0]) processFile(key, file.files[0], card); });
+        file.addEventListener('change', function(){
+          if(!file.files[0]) return;
+          card.querySelector('[data-fname]').textContent = file.files[0].name;
+          processFile(key, file.files[0], card);
+        });
         card.querySelector('[data-prevert]').addEventListener('click', function(){
           delete imgBlobs[key]; delete overrides[key]; persist(); renderImages(); renderProjects(); say('Reverted ' + key);
         });
@@ -359,14 +383,30 @@ footer.note b{color:var(--text-70)}
         else overrides[key] = val;
       });
     }
-    function persist(){ localStorage.setItem(LS_KEY, JSON.stringify(overrides)); }
+    function persist(){
+      var r = storeSet(JSON.stringify(overrides));
+      if(r === 'quota') say('Storage is FULL — browser refused to save. Remove some uploads or use smaller images.');
+      return r;
+    }
+    if(!storeOK){
+      var w = document.createElement('div');
+      w.className = 'banner';
+      w.innerHTML = '⚠ <b>This browser blocks saving for double-clicked files.</b> Your edits will be lost on reload. ' +
+        'Use <b>Google Chrome</b>, or open dashboard + site together at <b>http://localhost:8099</b>.';
+      var wrap = document.querySelector('.wrap');
+      wrap.insertBefore(w, wrap.firstChild);
+    }
 
     document.getElementById('save').addEventListener('click', function(){
-      collectTexts(); persist(); renderTexts(); renderImages(); renderProjects();
-      say('Saved to this browser. Press Publish to view on the site, Export JSON to publish for all visitors.');
+      collectTexts();
+      var r = persist(); renderTexts(); renderImages(); renderProjects();
+      if(r === 'ok') say('Saved to this browser. Press Publish to view on the site, Export JSON to publish for all visitors.');
     });
     document.getElementById('publish').addEventListener('click', function(){
-      collectTexts(); persist(); renderTexts(); renderImages(); renderProjects();
+      collectTexts();
+      var r = persist(); renderTexts(); renderImages(); renderProjects();
+      if(r === 'quota') return; /* message already shown */
+      if(r === 'memory'){ say('Saved for this tab only — open the site from the same tab. For permanent saving use Chrome or http://localhost:8099.'); return; }
       say('Published to this browser — opening the site with your changes…');
       setTimeout(function(){ window.open('index.html', '_blank'); }, 600);
     });
@@ -391,8 +431,14 @@ footer.note b{color:var(--text-70)}
       };
       r.readAsText(f); e.target.value = '';
     });
-    document.getElementById('reset').addEventListener('click', function(){
-      if(!confirm('Clear ALL overrides in this browser?')) return;
+    var resetBtn = document.getElementById('reset'), resetArmed = false, resetT = null;
+    resetBtn.addEventListener('click', function(){
+      if(!resetArmed){
+        resetArmed = true; resetBtn.textContent = 'Click again to confirm';
+        resetT = setTimeout(function(){ resetArmed = false; resetBtn.textContent = 'Reset all'; }, 4000);
+        return;
+      }
+      clearTimeout(resetT); resetArmed = false; resetBtn.textContent = 'Reset all';
       overrides = {}; imgBlobs = {}; persist(); renderTexts(); renderImages(); renderProjects(); say('All overrides cleared.');
     });
     document.getElementById('copy').addEventListener('click', function(){
