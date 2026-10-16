@@ -117,7 +117,7 @@ nav ul a.active{background:rgba(235,235,235,.92);color:#222}
   filter:drop-shadow(0 20px 60px rgba(0,0,0,.35))}
 /* big name: letters sway left/right slowly; the letters near the middle are faded but still readable.
    Fade each letter with --o (0 = invisible, 1 = solid). Speed: change 7s in .sw. Distance: change .14em in @keyframes sway. */
-.name{position:absolute;left:50%;top:7%;transform:translateX(-50%);z-index:5;display:flex;align-items:baseline;white-space:nowrap;
+.name{position:absolute;left:50%;top:16%;transform:translateX(-50%);z-index:5;display:flex;align-items:baseline;white-space:nowrap;
   font:700 clamp(2.4rem,9.5vw,13rem)/1 var(--font-display);letter-spacing:-.04em;color:#fff;pointer-events:none;text-shadow:0 6px 40px rgba(0,0,0,.25)}
 .name .gap{display:inline-block;width:.3em}
 .name .ch{display:inline-block;opacity:0;animation:chin 1s var(--ease) forwards;animation-delay:calc(var(--i) * 70ms + 150ms)}
@@ -330,6 +330,8 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 <section id="hero">
   <div class="stage">
     <img data-edit="hero.portrait" src="images/hero.jpg" alt="Portrait" width="864" height="1245" fetchpriority="high" onload="this.closest('.stage').classList.add('has-img')" onerror="this.closest('.stage').classList.remove('has-img')">
+  </div>
+
     <!-- PINTAME CLUB: --o is each letter's opacity (M, E, C, L are faded so the portrait shows through) -->
     <div class="name" role="img" aria-label="PINTAME CLUB">
       <span class="ch" style="--i:0;--o:1" aria-hidden="true"><span class="sw">P</span></span>
@@ -344,7 +346,6 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
       <span class="ch" style="--i:8;--o:.55" aria-hidden="true"><span class="sw">L</span></span>
       <span class="ch" style="--i:9;--o:.85" aria-hidden="true"><span class="sw">U</span></span>
       <span class="ch" style="--i:10;--o:1" aria-hidden="true"><span class="sw">B</span></span>
-    </div>
   </div>
 
   <div class="cut" aria-hidden="true">
