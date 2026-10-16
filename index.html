@@ -639,14 +639,17 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
   window.addEventListener('scroll', function(){ if(!ticking){ ticking = true; requestAnimationFrame(drift); } }, {passive:true});
   drift();
 
-  /* ---------- gallery tiles: 3D fly-in (rotateY) as they enter view ---------- */
+  /* ---------- gallery tiles: 3D fly-in (rotateY) as they enter view ----------
+     NOTE: observe the ROWS, not the tiles — the tiles' huge entrance transforms
+     make their boxes intersect early and the flight would play unseen. */
   (function(){
-    var tiles = gal.querySelectorAll('.gi');
-    if(reduce || !('IntersectionObserver' in window)){ tiles.forEach(function(t){ t.classList.add('in'); }); return; }
+    var rows = gal.querySelectorAll('.grow');
+    function land(row){ row.querySelectorAll('.gi').forEach(function(t){ t.classList.add('in'); }); }
+    if(reduce || !('IntersectionObserver' in window)){ rows.forEach(land); return; }
     var io = new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+      es.forEach(function(e){ if(e.isIntersecting){ land(e.target); io.unobserve(e.target); } });
     }, {rootMargin:'0px 0px -8% 0px', threshold:.12});
-    tiles.forEach(function(t){ io.observe(t); });
+    rows.forEach(function(r){ io.observe(r); });
   })();
 
   /* ---------- mouse trail: a glowing line that follows the cursor and shifts colour ---------- */
