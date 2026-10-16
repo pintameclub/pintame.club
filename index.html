@@ -204,10 +204,15 @@ nav ul a.active{background:rgba(235,235,235,.92);color:#222}
 #gallery{padding:clamp(110px,14vw,190px) 0 clamp(80px,12vw,180px);overflow:hidden;
   background:linear-gradient(180deg,var(--bg) 0,#4a1015 12%,#c9444a 34%,#e0645f 48%,#7a1519 78%,var(--bg) 100%)}
 #gallery .gtitle{position:absolute;left:0;top:clamp(20px,4vw,50px);font:700 clamp(7rem,22vw,22rem)/.85 var(--font-display);letter-spacing:-.05em;color:#ffb3b0;z-index:3;white-space:nowrap;margin-left:-.02em;pointer-events:none}
-.tilt{transform:rotate(-6deg) scale(1.12);display:flex;flex-direction:column;gap:clamp(12px,1.6vw,22px);margin-top:clamp(80px,13vw,200px);position:relative;z-index:2}
-.grow{display:flex;gap:clamp(12px,1.6vw,22px);width:max-content;will-change:transform}
-.gi{height:clamp(150px,20vw,300px);border-radius:10px;border:1px solid rgba(255,255,255,.1);background:var(--g);box-shadow:0 20px 50px rgba(0,0,0,.35);flex:none;transition:transform .9s var(--ease)}
+.tilt{transform:rotate(-5deg) scale(1.15);transform-style:preserve-3d;display:flex;flex-direction:column;gap:clamp(12px,1.6vw,22px);margin-top:clamp(80px,13vw,200px);position:relative;z-index:2}
+#gallery .tilt-wrap{perspective:1971px}
+.grow{display:flex;gap:clamp(12px,1.6vw,22px);width:max-content;will-change:transform;transform-style:preserve-3d}
+.gi{height:clamp(150px,20vw,300px);border-radius:10px;border:1px solid rgba(255,255,255,.1);background:var(--g);box-shadow:0 20px 50px rgba(0,0,0,.35);flex:none;
+  opacity:0;transform:translate(var(--fx,0px),var(--fy,60px)) scale(2) rotate(-5deg) rotateY(70deg);
+  transition:opacity .9s var(--ease),transform 1.1s var(--ease);transition-delay:calc(var(--i,0) * 90ms)}
+.gi.in{opacity:1;transform:none}
 .gi:hover{transform:scale(1.04) rotate(.8deg)}
+@media (prefers-reduced-motion:reduce){.gi{opacity:1;transform:none;transition:none}}
 /* ---------- dashboard-editable images: real <img> over gradient fallbacks ---------- */
 .stage{background:linear-gradient(160deg,#2a2a30,#0c0c0e);border-radius:6px 6px 0 0}
 .thumb .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
@@ -423,14 +428,18 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 <!-- GALLERY -->
 <section id="gallery">
   <div class="gtitle" aria-hidden="true" data-edit="gallery.title">Gallery</div>
-  <div class="tilt" aria-label="Gallery of work (placeholders)">
+  <div class="tilt-wrap"><div class="tilt" aria-label="Gallery of work (placeholders)">
     <div class="grow" data-dir="1">
-      <div class="gi" style="width:clamp(180px,22vw,330px);--g:linear-gradient(135deg,#f5c542,#e0882a)"><img data-edit="gallery.tile1" src="images/gallery-1.jpg" alt="Gallery tile 1" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption1">Caption One</figcaption></div>
-      <div class="gi" style="width:clamp(220px,28vw,420px);--g:linear-gradient(135deg,#dfe6f5,#8da3d6)"><img data-edit="gallery.tile2" src="images/gallery-2.jpg" alt="Gallery tile 2" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption2">Caption Two</figcaption></div>
-      <div class="gi" style="width:clamp(240px,30vw,460px);--g:linear-gradient(135deg,#1a1a1f,#2c2c33)"><img data-edit="gallery.tile3" src="images/gallery-3.jpg" alt="Gallery tile 3" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption3">Caption Three</figcaption></div>
-      <div class="gi" style="width:clamp(260px,33vw,520px);--g:linear-gradient(135deg,#2a1a5a,#0c0a24)"><img data-edit="gallery.tile4" src="images/gallery-4.jpg" alt="Gallery tile 4" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption4">Caption Four</figcaption></div>
-      <div class="gi" style="width:clamp(240px,30vw,460px);--g:linear-gradient(135deg,#0f3d2a,#06120d)"><img data-edit="gallery.tile5" src="images/gallery-5.jpg" alt="Gallery tile 5" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption5">Caption Five</figcaption></div>
-      <div class="gi" style="width:clamp(200px,24vw,360px);--g:linear-gradient(135deg,#3b6cff,#e6409c)"><img data-edit="gallery.tile6" src="images/gallery-6.jpg" alt="Gallery tile 6" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption6">Caption Six</figcaption></div>
+      <div class="gi" style="--i:0;--fx:-34vw;--fy:12vh;width:clamp(180px,22vw,330px);--g:linear-gradient(135deg,#f5c542,#e0882a)"><img data-edit="gallery.tile1" src="images/gallery-1.jpg" alt="Gallery tile 1" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption1">Caption One</figcaption></div>
+      <div class="gi" style="--i:1;--fx:30vw;--fy:-10vh;width:clamp(220px,28vw,420px);--g:linear-gradient(135deg,#dfe6f5,#8da3d6)"><img data-edit="gallery.tile2" src="images/gallery-2.jpg" alt="Gallery tile 2" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption2">Caption Two</figcaption></div>
+    </div>
+    <div class="grow" data-dir="-1">
+      <div class="gi" style="--i:2;--fx:-28vw;--fy:-14vh;width:clamp(240px,30vw,460px);--g:linear-gradient(135deg,#1a1a1f,#2c2c33)"><img data-edit="gallery.tile3" src="images/gallery-3.jpg" alt="Gallery tile 3" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption3">Caption Three</figcaption></div>
+      <div class="gi" style="--i:3;--fx:36vw;--fy:14vh;width:clamp(260px,33vw,520px);--g:linear-gradient(135deg,#2a1a5a,#0c0a24)"><img data-edit="gallery.tile4" src="images/gallery-4.jpg" alt="Gallery tile 4" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption4">Caption Four</figcaption></div>
+    </div>
+    <div class="grow" data-dir="1">
+      <div class="gi" style="--i:4;--fx:-32vw;--fy:10vh;width:clamp(240px,30vw,460px);--g:linear-gradient(135deg,#0f3d2a,#06120d)"><img data-edit="gallery.tile5" src="images/gallery-5.jpg" alt="Gallery tile 5" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption5">Caption Five</figcaption></div>
+      <div class="gi" style="--i:5;--fx:26vw;--fy:-12vh;width:clamp(200px,24vw,360px);--g:linear-gradient(135deg,#3b6cff,#e6409c)"><img data-edit="gallery.tile6" src="images/gallery-6.jpg" alt="Gallery tile 6" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption6">Caption Six</figcaption></div>
     </div>
     <div class="grow" data-dir="-1" style="margin-left:-12vw">
       <div class="gi" style="width:clamp(160px,20vw,300px);--g:linear-gradient(135deg,#ffffff,#c9c9d0)"></div>
@@ -447,7 +456,7 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
       <div class="gi" style="width:clamp(240px,30vw,460px);--g:linear-gradient(135deg,#e9e2d6,#a89f8f)"></div>
       <div class="gi" style="width:clamp(260px,33vw,520px);--g:linear-gradient(135deg,#4a1a6a,#12082a)"></div>
     </div>
-  </div>
+  </div></div>
 </section>
 
 <!-- ABOUT -->
@@ -626,6 +635,16 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
   }
   window.addEventListener('scroll', function(){ if(!ticking){ ticking = true; requestAnimationFrame(drift); } }, {passive:true});
   drift();
+
+  /* ---------- gallery tiles: 3D fly-in (rotateY) as they enter view ---------- */
+  (function(){
+    var tiles = gal.querySelectorAll('.gi');
+    if(reduce || !('IntersectionObserver' in window)){ tiles.forEach(function(t){ t.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {rootMargin:'0px 0px -8% 0px', threshold:.12});
+    tiles.forEach(function(t){ io.observe(t); });
+  })();
 
   /* ---------- mouse trail: a glowing line that follows the cursor and shifts colour ---------- */
   var canvas = document.getElementById('trail');
