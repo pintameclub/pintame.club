@@ -205,6 +205,12 @@ nav ul a.active{background:rgba(235,235,235,.92);color:#222}
 .grow{display:flex;gap:clamp(12px,1.6vw,22px);width:max-content;will-change:transform}
 .gi{height:clamp(150px,20vw,300px);border-radius:10px;border:1px solid rgba(255,255,255,.1);background:var(--g);box-shadow:0 20px 50px rgba(0,0,0,.35);flex:none;transition:transform .9s var(--ease)}
 .gi:hover{transform:scale(1.04) rotate(.8deg)}
+/* ---------- dashboard-editable images: real <img> over gradient fallbacks ---------- */
+.stage{background:linear-gradient(160deg,#2a2a30,#0c0c0e);border-radius:6px 6px 0 0}
+.thumb .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.gi{position:relative;overflow:hidden}
+.gi img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.gi figcaption{position:absolute;left:10px;bottom:10px;z-index:2;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:4px 12px;border-radius:100px;font:500 .8rem var(--font-ui);color:#fff;white-space:nowrap}
 
 /* ============ ABOUT ============ */
 #about{padding:clamp(80px,12vw,170px) 0 clamp(80px,10vw,140px);overflow:hidden;min-height:110vh;
@@ -305,13 +311,14 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 <header>
   <nav id="nav" aria-label="Main">
     <ul>
-      <li><a href="#hero" class="active"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Home</span></a></li>
-      <li><a href="#work"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><span>Work</span></a></li>
-      <li><a href="#skills"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Skills</span></a></li>
-      <li><a href="#gallery"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span>Gallery</span></a></li>
-      <li><a href="#contact"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span>Contact</span></a></li>
+      <li><a href="#hero" class="active"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-edit="nav.home">Home</span></a></li>
+      <li><a href="#work"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><span data-edit="nav.work">Work</span></a></li>
+      <li><a href="#skills"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span data-edit="nav.skills">Skills</span></a></li>
+      <li><a href="#gallery"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span data-edit="nav.gallery">Gallery</span></a></li>
+      <li><a href="#contact"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span data-edit="nav.contact">Contact</span></a></li>
+      <li><a href="dashboard.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span data-edit="nav.dashboard">Dashboard</span></a></li>
     </ul>
-    <a class="cta" href="#contact">Book Meeting</a>
+    <a class="cta" href="#contact" data-edit="nav.cta">Book Meeting</a>
   </nav>
 </header>
 
@@ -319,7 +326,7 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 <!-- HERO -->
 <section id="hero">
   <div class="stage">
-    <img src="images/hero.jpg" alt="Portrait" width="864" height="1245" fetchpriority="high">
+    <img data-edit="hero.portrait" src="images/hero.jpg" alt="Portrait" width="864" height="1245" fetchpriority="high" onerror="this.style.display='none'">
     <!-- PINTAME CLUB: --o is each letter's opacity (M, E, C, L are faded so the portrait shows through) -->
     <div class="name" role="img" aria-label="PINTAME CLUB">
       <span class="ch" style="--i:0;--o:1" aria-hidden="true"><span class="sw">P</span></span>
@@ -339,62 +346,62 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 
   <div class="cut" aria-hidden="true">
     <picture>
-      <img src="images/character.png" alt="" width="1023" height="1161" fetchpriority="high">
+      <img data-edit="hero.character" src="images/character.png" alt="" width="1023" height="1161" fetchpriority="high">
     </picture>
   </div>
 
   <div class="hero-left">
-    <h1><span class="rv" style="--d:300ms"><i>Brand &amp; Product Designer</i></span></h1>
-    <p class="words" data-split>Add a short bio here. Say what you do, who you do it for and how long you have been doing it. Replace this text with your own.</p>
+    <h1><span class="rv" style="--d:300ms"><i data-edit="hero.title">Brand &amp; Product Designer</i></span></h1>
+    <p class="words" data-split data-edit="hero.bio">Add a short bio here. Say what you do, who you do it for and how long you have been doing it. Replace this text with your own.</p>
     <div class="btns up" style="--d:600ms">
-      <a class="btn" href="#contact">Book Meeting</a>
-      <a class="btn" href="#work">View Work <span class="arr" aria-hidden="true">→</span></a>
+      <a class="btn" href="#contact" data-edit="hero.btn1">Book Meeting</a>
+      <a class="btn" href="#work"><span data-edit="hero.btn2">View Work</span> <span class="arr" aria-hidden="true">→</span></a>
     </div>
   </div>
 
   <div class="hero-right up" style="--d:700ms">
-    <div class="sig" aria-hidden="true">Pintame Club</div>
-    <div class="quote-line"><b aria-hidden="true">“</b><span>I turn ideas into meaningful products</span></div>
+    <div class="sig" aria-hidden="true" data-edit="hero.signature">Pintame Club</div>
+    <div class="quote-line"><b aria-hidden="true">“</b><span data-edit="hero.quote">I turn ideas into meaningful products</span></div>
   </div>
 </section>
 
 <!-- LOGOS + INTRO -->
 <div class="band">
   <div class="logos up" aria-label="Client logos (placeholders)">
-    <span class="l1">Logo One</span><span class="l2">LOGO TWO</span><span class="l3">logo3</span><span class="l4">LOGO4</span>
-    <span class="l5">logo five</span><span class="l6">Logo Six</span><span class="l7">LOGO SEVEN</span><span class="l8">LOGO EIGHT</span>
+    <span class="l1" data-edit="band.logo1">Logo One</span><span class="l2" data-edit="band.logo2">LOGO TWO</span><span class="l3" data-edit="band.logo3">logo3</span><span class="l4" data-edit="band.logo4">LOGO4</span>
+    <span class="l5" data-edit="band.logo5">logo five</span><span class="l6" data-edit="band.logo6">Logo Six</span><span class="l7" data-edit="band.logo7">LOGO SEVEN</span><span class="l8" data-edit="band.logo8">LOGO EIGHT</span>
   </div>
   <div class="intro-grid">
     <h2 aria-label="Design that sparks engagement and inspires action">
-      <span class="rv" data-reveal style="--d:0ms"><i>Design that sparks</i></span><br>
-      <span class="rv" data-reveal style="--d:120ms"><i>engagement and</i></span><br>
-      <span class="rv" data-reveal style="--d:240ms"><i>inspires action</i></span>
+      <span class="rv" data-reveal style="--d:0ms"><i data-edit="band.title1">Design that sparks</i></span><br>
+      <span class="rv" data-reveal style="--d:120ms"><i data-edit="band.title2">engagement and</i></span><br>
+      <span class="rv" data-reveal style="--d:240ms"><i data-edit="band.title3">inspires action</i></span>
     </h2>
-    <p class="words" data-split>Placeholder paragraph. Add a few sentences about your experience, the kinds of clients you work with and how you approach design research and problem solving.</p>
+    <p class="words" data-split data-edit="band.intro">Placeholder paragraph. Add a few sentences about your experience, the kinds of clients you work with and how you approach design research and problem solving.</p>
   </div>
 </div>
 
 <!-- PROJECTS -->
 <section id="work">
-  <div class="watermark" aria-hidden="true">Projects</div>
+  <div class="watermark" aria-hidden="true" data-edit="work.watermark">Projects</div>
   <div class="projects">
-    <a class="project up" href="#" style="--bgimg:linear-gradient(135deg,#0f3d3a,#07131a 70%)"><div class="thumb"><div class="img"></div><div class="grid6"></div></div><div class="pfoot"><h3>Project One</h3><span class="vbtn">View Project <span aria-hidden="true">↗</span></span></div></a>
-    <a class="project up" href="#" style="--bgimg:linear-gradient(135deg,#5a4524,#1a1209 70%);--d:120ms"><div class="thumb"><div class="img"></div><div class="grid6"></div></div><div class="pfoot"><h3>Project Two</h3><span class="vbtn">View Project <span aria-hidden="true">↗</span></span></div></a>
-    <a class="project up" href="#" style="--bgimg:linear-gradient(135deg,#2b2b30,#0a0a0c 70%)"><div class="tag">Website</div><div class="thumb"><div class="img"></div><div class="grid6"></div></div><div class="pfoot"><h3>Project Three</h3><span class="vbtn">View Project <span aria-hidden="true">↗</span></span></div></a>
-    <a class="project up" href="#" style="--bgimg:linear-gradient(135deg,#4a3a2a,#120d09 70%);--d:120ms"><div class="tag">Website</div><div class="thumb"><div class="img"></div><div class="grid6"></div></div><div class="pfoot"><h3>Project Four</h3><span class="vbtn">View Project <span aria-hidden="true">↗</span></span></div></a>
+    <a class="project up" href="#" style="--bgimg:linear-gradient(135deg,#0f3d3a,#07131a 70%)"><div class="thumb"><div class="img"><img data-edit="work.thumb1" src="images/work-1.jpg" alt="Project One" loading="lazy" onerror="this.style.display='none'"></div><div class="grid6"></div></div><div class="pfoot"><h3 data-edit="work.title1">Project One</h3><span class="vbtn">View Project <span aria-hidden="true">↗</span></span></div></a>
+    <a class="project up" href="#" style="--bgimg:linear-gradient(135deg,#5a4524,#1a1209 70%);--d:120ms"><div class="thumb"><div class="img"><img data-edit="work.thumb2" src="images/work-2.jpg" alt="Project Two" loading="lazy" onerror="this.style.display='none'"></div><div class="grid6"></div></div><div class="pfoot"><h3 data-edit="work.title2">Project Two</h3><span class="vbtn">View Project <span aria-hidden="true">↗</span></span></div></a>
+    <a class="project up" href="#" style="--bgimg:linear-gradient(135deg,#2b2b30,#0a0a0c 70%)"><div class="tag">Website</div><div class="thumb"><div class="img"><img data-edit="work.thumb3" src="images/work-3.jpg" alt="Project Three" loading="lazy" onerror="this.style.display='none'"></div><div class="grid6"></div></div><div class="pfoot"><h3 data-edit="work.title3">Project Three</h3><span class="vbtn">View Project <span aria-hidden="true">↗</span></span></div></a>
+    <a class="project up" href="#" style="--bgimg:linear-gradient(135deg,#4a3a2a,#120d09 70%);--d:120ms"><div class="tag">Website</div><div class="thumb"><div class="img"><img data-edit="work.thumb4" src="images/work-4.jpg" alt="Project Four" loading="lazy" onerror="this.style.display='none'"></div><div class="grid6"></div></div><div class="pfoot"><h3 data-edit="work.title4">Project Four</h3><span class="vbtn">View Project <span aria-hidden="true">↗</span></span></div></a>
   </div>
 </section>
 
 <!-- STATS -->
 <section id="stats">
   <div class="wrap">
-    <p class="eyebrow up">Learning through every path</p>
-    <h2 class="up" style="--d:100ms">My 11 years journey</h2>
+    <p class="eyebrow up" data-edit="stats.eyebrow">Learning through every path</p>
+    <h2 class="up" style="--d:100ms" data-edit="stats.heading">My 11 years journey</h2>
     <div class="stats up" style="--d:200ms">
-      <div class="stat"><b data-count="20">0+</b><span>Websites Done</span></div>
-      <div class="stat"><b data-count="11">0+</b><span>Years In Design</span></div>
-      <div class="stat"><b data-count="5">0+</b><span>Projects</span></div>
-      <div class="stat"><b data-count="45">0+</b><span>Design Awards</span></div>
+      <div class="stat"><b data-count="20" data-edit="stats.num1">0+</b><span data-edit="stats.label1">Websites Done</span></div>
+      <div class="stat"><b data-count="11" data-edit="stats.num2">0+</b><span data-edit="stats.label2">Years In Design</span></div>
+      <div class="stat"><b data-count="5" data-edit="stats.num3">0+</b><span data-edit="stats.label3">Projects</span></div>
+      <div class="stat"><b data-count="45" data-edit="stats.num4">0+</b><span data-edit="stats.label4">Design Awards</span></div>
     </div>
   </div>
 </section>
@@ -402,24 +409,24 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 <!-- SERVICES -->
 <section id="skills">
   <div class="wrap">
-    <div class="srv up"><h3>Web Design<sup>01</sup></h3><p>Modern, high-performance websites designed to capture attention, communicate clearly and turn visitors into customers.</p></div>
-    <div class="srv up"><h3>Development<sup>02</sup></h3><p>Pixel-perfect builds with smooth animations, CMS integration, responsive layouts and performance tuned for a seamless experience.</p></div>
-    <div class="srv up"><h3>Branding<sup>03</sup></h3><p>Memorable brand identities with strategic logos, visual systems and a design language that stays consistent across every touchpoint.</p></div>
-    <div class="srv up"><h3>UI / UX Design<sup>04</sup></h3><p>Intuitive digital experiences that feel effortless to use, from SaaS platforms to mobile apps and dashboards.</p></div>
+    <div class="srv up"><h3><span data-edit="skills.title1">Web Design</span><sup>01</sup></h3><p data-edit="skills.text1">Modern, high-performance websites designed to capture attention, communicate clearly and turn visitors into customers.</p></div>
+    <div class="srv up"><h3><span data-edit="skills.title2">Development</span><sup>02</sup></h3><p data-edit="skills.text2">Pixel-perfect builds with smooth animations, CMS integration, responsive layouts and performance tuned for a seamless experience.</p></div>
+    <div class="srv up"><h3><span data-edit="skills.title3">Branding</span><sup>03</sup></h3><p data-edit="skills.text3">Memorable brand identities with strategic logos, visual systems and a design language that stays consistent across every touchpoint.</p></div>
+    <div class="srv up"><h3><span data-edit="skills.title4">UI / UX Design</span><sup>04</sup></h3><p data-edit="skills.text4">Intuitive digital experiences that feel effortless to use, from SaaS platforms to mobile apps and dashboards.</p></div>
   </div>
 </section>
 
 <!-- GALLERY -->
 <section id="gallery">
-  <div class="gtitle" aria-hidden="true">Gallery</div>
+  <div class="gtitle" aria-hidden="true" data-edit="gallery.title">Gallery</div>
   <div class="tilt" aria-label="Gallery of work (placeholders)">
     <div class="grow" data-dir="1">
-      <div class="gi" style="width:clamp(180px,22vw,330px);--g:linear-gradient(135deg,#f5c542,#e0882a)"></div>
-      <div class="gi" style="width:clamp(220px,28vw,420px);--g:linear-gradient(135deg,#dfe6f5,#8da3d6)"></div>
-      <div class="gi" style="width:clamp(240px,30vw,460px);--g:linear-gradient(135deg,#1a1a1f,#2c2c33)"></div>
-      <div class="gi" style="width:clamp(260px,33vw,520px);--g:linear-gradient(135deg,#2a1a5a,#0c0a24)"></div>
-      <div class="gi" style="width:clamp(240px,30vw,460px);--g:linear-gradient(135deg,#0f3d2a,#06120d)"></div>
-      <div class="gi" style="width:clamp(200px,24vw,360px);--g:linear-gradient(135deg,#3b6cff,#e6409c)"></div>
+      <div class="gi" style="width:clamp(180px,22vw,330px);--g:linear-gradient(135deg,#f5c542,#e0882a)"><img data-edit="gallery.tile1" src="images/gallery-1.jpg" alt="Gallery tile 1" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption1">Caption One</figcaption></div>
+      <div class="gi" style="width:clamp(220px,28vw,420px);--g:linear-gradient(135deg,#dfe6f5,#8da3d6)"><img data-edit="gallery.tile2" src="images/gallery-2.jpg" alt="Gallery tile 2" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption2">Caption Two</figcaption></div>
+      <div class="gi" style="width:clamp(240px,30vw,460px);--g:linear-gradient(135deg,#1a1a1f,#2c2c33)"><img data-edit="gallery.tile3" src="images/gallery-3.jpg" alt="Gallery tile 3" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption3">Caption Three</figcaption></div>
+      <div class="gi" style="width:clamp(260px,33vw,520px);--g:linear-gradient(135deg,#2a1a5a,#0c0a24)"><img data-edit="gallery.tile4" src="images/gallery-4.jpg" alt="Gallery tile 4" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption4">Caption Four</figcaption></div>
+      <div class="gi" style="width:clamp(240px,30vw,460px);--g:linear-gradient(135deg,#0f3d2a,#06120d)"><img data-edit="gallery.tile5" src="images/gallery-5.jpg" alt="Gallery tile 5" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption5">Caption Five</figcaption></div>
+      <div class="gi" style="width:clamp(200px,24vw,360px);--g:linear-gradient(135deg,#3b6cff,#e6409c)"><img data-edit="gallery.tile6" src="images/gallery-6.jpg" alt="Gallery tile 6" loading="lazy" onerror="this.style.display='none'"><figcaption data-edit="gallery.caption6">Caption Six</figcaption></div>
     </div>
     <div class="grow" data-dir="-1" style="margin-left:-12vw">
       <div class="gi" style="width:clamp(160px,20vw,300px);--g:linear-gradient(135deg,#ffffff,#c9c9d0)"></div>
@@ -445,12 +452,12 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
   <div class="wrap">
     <div class="about-grid">
       <div class="up">
-        <p class="lead">Hi, I'm Your Name — a brand and product designer who turns ideas into clear, memorable experiences.</p>
-        <p class="body">Write your story here: where you started, what you learned and what you care about when you design. Mention your experience, the kinds of projects you take on and the clients you have worked with.</p>
-        <div class="tags"><span>Web Design</span><span>Brand Design</span><span>UI Design</span><span>Product Design</span></div>
+        <p class="lead" data-edit="about.lead">Hi, I'm Your Name — a brand and product designer who turns ideas into clear, memorable experiences.</p>
+        <p class="body" data-edit="about.body">Write your story here: where you started, what you learned and what you care about when you design. Mention your experience, the kinds of projects you take on and the clients you have worked with.</p>
+        <div class="tags"><span data-edit="about.tag1">Web Design</span><span data-edit="about.tag2">Brand Design</span><span data-edit="about.tag3">UI Design</span><span data-edit="about.tag4">Product Design</span></div>
         <div class="exp">
-          <div>Designer <span>Freelance · 2015–Present</span></div>
-          <div>Role Title <span>Company · 2012–2015</span></div>
+          <div><span data-edit="about.exp1">Designer</span> <span data-edit="about.exp1sub">Freelance · 2015–Present</span></div>
+          <div><span data-edit="about.exp2">Role Title</span> <span data-edit="about.exp2sub">Company · 2012–2015</span></div>
         </div>
       </div>
       <div class="person2 up" style="--d:150ms" role="img" aria-label="Portrait placeholder"></div>
@@ -460,10 +467,10 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 
 <!-- TESTIMONIALS -->
 <section id="clients">
-  <h2 class="up">What Clients Say</h2>
+  <h2 class="up" data-edit="clients.heading">What Clients Say</h2>
   <div class="tick" aria-label="Client testimonials">
     <div class="track">
-      <figure class="card"><p>Replace with a real client testimonial. Keep it to two or three sentences about the result you delivered.</p><div class="avatar"></div><figcaption class="who"><b>Client Name</b><small>Role, Company</small></figcaption></figure>
+      <figure class="card"><p data-edit="clients.quote1">Replace with a real client testimonial. Keep it to two or three sentences about the result you delivered.</p><div class="avatar"></div><figcaption class="who"><b data-edit="clients.name1">Client Name</b><small data-edit="clients.role1">Role, Company</small></figcaption></figure>
       <figure class="card"><p>Replace with a real client testimonial. Keep it to two or three sentences about the result you delivered.</p><div class="avatar"></div><figcaption class="who"><b>Client Name</b><small>Role, Company</small></figcaption></figure>
       <figure class="card"><p>Replace with a real client testimonial. Keep it to two or three sentences about the result you delivered.</p><div class="avatar"></div><figcaption class="who"><b>Client Name</b><small>Role, Company</small></figcaption></figure>
       <figure class="card"><p>Replace with a real client testimonial. Keep it to two or three sentences about the result you delivered.</p><div class="avatar"></div><figcaption class="who"><b>Client Name</b><small>Role, Company</small></figcaption></figure>
@@ -482,15 +489,15 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 
 <!-- FAQ -->
 <section id="faq">
-  <div class="watermark" aria-hidden="true">FAQs</div>
+  <div class="watermark" aria-hidden="true" data-edit="faq.watermark">FAQs</div>
   <div class="wrap">
     <div class="faq up">
-      <details><summary><span class="sn">01</span><span>What does a project look like?</span><span class="pl"></span></summary><p>Describe your process: discovery, concepts, feedback rounds and delivery.</p></details>
-      <details><summary><span class="sn">02</span><span>How is the pricing structure?</span><span class="pl"></span></summary><p>Explain how you price projects.</p></details>
-      <details><summary><span class="sn">03</span><span>Are all projects fixed scope?</span><span class="pl"></span></summary><p>Add your answer here.</p></details>
-      <details><summary><span class="sn">04</span><span>What is the ROI?</span><span class="pl"></span></summary><p>Add your answer here.</p></details>
-      <details><summary><span class="sn">05</span><span>How do we measure success?</span><span class="pl"></span></summary><p>Add your answer here.</p></details>
-      <details><summary><span class="sn">06</span><span>What do I need to get started?</span><span class="pl"></span></summary><p>Add your answer here.</p></details>
+      <details><summary><span class="sn">01</span><span data-edit="faq.q1">What does a project look like?</span><span class="pl"></span></summary><p data-edit="faq.a1">Describe your process: discovery, concepts, feedback rounds and delivery.</p></details>
+      <details><summary><span class="sn">02</span><span data-edit="faq.q2">How is the pricing structure?</span><span class="pl"></span></summary><p data-edit="faq.a2">Explain how you price projects.</p></details>
+      <details><summary><span class="sn">03</span><span data-edit="faq.q3">Are all projects fixed scope?</span><span class="pl"></span></summary><p data-edit="faq.a3">Add your answer here.</p></details>
+      <details><summary><span class="sn">04</span><span data-edit="faq.q4">What is the ROI?</span><span class="pl"></span></summary><p data-edit="faq.a4">Add your answer here.</p></details>
+      <details><summary><span class="sn">05</span><span data-edit="faq.q5">How do we measure success?</span><span class="pl"></span></summary><p data-edit="faq.a5">Add your answer here.</p></details>
+      <details><summary><span class="sn">06</span><span data-edit="faq.q6">What do I need to get started?</span><span class="pl"></span></summary><p data-edit="faq.a6">Add your answer here.</p></details>
     </div>
   </div>
 </section>
@@ -498,7 +505,7 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
 <!-- CONTACT -->
 <section id="contact">
   <div class="wrap">
-    <h2 class="huge" aria-label="Contact"><span class="rv" data-reveal style="--d:0ms"><i>Contact</i></span></h2>
+    <h2 class="huge" aria-label="Contact"><span class="rv" data-reveal style="--d:0ms"><i data-edit="contact.title">Contact</i></span></h2>
     <div class="contact-grid">
       <form class="up" onsubmit="event.preventDefault();this.querySelector('button').textContent='Thanks — message ready to send';">
         <label>Name<input name="name" required autocomplete="name"></label>
@@ -507,20 +514,20 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
           <select name="budget"><option>Under $1,000</option><option>$1,000 – $2,000</option><option>$2,000 – $5,000</option><option>$5,000 – $10,000</option></select>
         </label>
         <label>Message<textarea name="message" required></textarea></label>
-        <button class="btn light" type="submit" style="justify-self:start">Submit <span class="arr" aria-hidden="true">→</span></button>
+        <button class="btn light" type="submit" style="justify-self:start"><span data-edit="contact.submit">Submit</span> <span class="arr" aria-hidden="true">→</span></button>
       </form>
       <div class="links up" style="--d:120ms">
-        <a href="mailto:hello@example.com">hello@example.com <span>↗</span></a>
-        <a href="#">Instagram <span>↗</span></a>
-        <a href="#">LinkedIn <span>↗</span></a>
-        <a href="#">Dribbble <span>↗</span></a>
+        <a href="mailto:hello@example.com"><span data-edit="contact.email">hello@example.com</span> <span>↗</span></a>
+        <a href="#"><span data-edit="contact.ig">Instagram</span> <span>↗</span></a>
+        <a href="#"><span data-edit="contact.li">LinkedIn</span> <span>↗</span></a>
+        <a href="#"><span data-edit="contact.dr">Dribbble</span> <span>↗</span></a>
       </div>
     </div>
   </div>
 </section>
 </main>
 
-<footer class="site"><div class="wrap">© 2026 Your Name. All rights reserved.</div></footer>
+<footer class="site"><div class="wrap" data-edit="footer.copy">© 2026 Your Name. All rights reserved.</div></footer>
 
 <script>
 (function(){
@@ -666,6 +673,32 @@ footer.site{border-top:1px solid var(--line);padding:30px 0;color:var(--text-50)
     }
   }
 })();
+</script>
+<script>
+/* pintame overrides: applies Dashboard edits saved in THIS browser (localStorage key "pintame-overrides-v1").
+   Text keys set textContent; image keys (elements whose [data-edit] is an IMG) set src. Best-effort: never breaks the page. */
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    var raw = localStorage.getItem('pintame-overrides-v1');
+    if(!raw) return;
+    var data = JSON.parse(raw);
+    if(!data || typeof data !== 'object') return;
+    document.querySelectorAll('[data-edit]').forEach(function(el){
+      var key = el.getAttribute('data-edit');
+      if(!key || !(key in data)) return;
+      var val = data[key];
+      if(typeof val !== 'string' || !val) return;
+      if(el.tagName === 'IMG'){ el.src = val; el.style.display = ''; }
+      else {
+        el.textContent = val;
+        if(el.hasAttribute('data-count')){
+          var n = parseInt(val.replace(/[^0-9]/g,''), 10);
+          if(!isNaN(n)) el.setAttribute('data-count', String(n));
+        }
+      }
+    });
+  }catch(e){ /* ignore: overrides must never break the page */ }
+});
 </script>
 </body>
 </html>

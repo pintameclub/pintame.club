@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pintame Club — Dashboard</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050506; --cell:#0e0e11; --text:#fff;
+  --text-70:rgba(255,255,255,.7); --text-60:rgba(255,255,255,.6); --text-50:rgba(255,255,255,.5);
+  --line:rgba(255,255,255,.14); --line-strong:rgba(255,255,255,.28);
+  --glass:rgba(255,255,255,.06); --accent:#fb511e;
+  --font-display:"Inter",system-ui,sans-serif; --font-body:"Manrope",system-ui,sans-serif;
+  --r-pill:100px; --r-md:10px; --r-sm:8px; --ease:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;padding:0 20px 80px}
+.wrap{max-width:1060px;margin:0 auto}
+.banner{background:linear-gradient(135deg,#3a1503,#7d1f0f);border:1px solid rgba(251,81,30,.5);border-radius:var(--r-md);padding:14px 20px;margin:20px 0;font-size:.95rem}
+.banner b{font-weight:600}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:18px 0}
+.topbar h1{font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.2rem);letter-spacing:-.04em;flex:1 1 220px}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border-radius:var(--r-pill);border:1px solid var(--line-strong);background:var(--glass);color:#fff;font:500 .92rem var(--font-display);cursor:pointer;transition:transform .5s var(--ease),background .3s}
+.btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.12)}
+.btn.primary{background:#f0f0f0;color:#111;border-color:#f0f0f0;font-weight:600}
+.btn.primary:hover{background:#fff}
+.btn.danger{border-color:rgba(255,90,90,.5);color:#ffb3b0}
+.btn.filebtn{position:relative;overflow:hidden}
+.btn.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.tabs{display:flex;gap:8px;margin:6px 0 20px;background:var(--glass);border:1px solid var(--line);border-radius:var(--r-pill);padding:5px;width:max-content;max-width:100%}
+.tabs button{border:0;background:transparent;color:var(--text-70);font:500 .95rem var(--font-display);padding:10px 28px;border-radius:var(--r-pill);cursor:pointer;transition:background .3s,color .3s}
+.tabs button.active{background:rgba(235,235,235,.92);color:#222}
+.group{margin-bottom:28px}
+.group > h2{font-family:var(--font-display);font-size:1.05rem;letter-spacing:.02em;text-transform:uppercase;color:var(--text-70);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.group > h2 .count{background:var(--glass);border:1px solid var(--line);border-radius:var(--r-pill);padding:1px 12px;font-size:.8rem}
+.field{background:var(--cell);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;margin-bottom:10px}
+.field label.key{display:block;font:600 .85rem var(--font-display);margin-bottom:2px}
+.field .def{font-size:.82rem;color:var(--text-50);margin-bottom:10px;word-break:break-word}
+.field .def.overridden{color:#ffd9a8}
+.field input[type=text],.field textarea{width:100%;font:400 .95rem var(--font-body);color:#fff;background:var(--glass);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 14px;transition:border-color .3s}
+.field input:focus,.field textarea:focus{outline:none;border-color:#fff}
+.field textarea{min-height:74px;resize:vertical}
+.field .meta{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-50);margin-top:6px}
+.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.imgcard{background:var(--cell);border:1px solid var(--line);border-radius:var(--r-md);padding:14px}
+.imgcard .key{font:600 .85rem var(--font-display);margin-bottom:8px}
+.imgcard .prev{position:relative;width:100%;aspect-ratio:16/10;border-radius:var(--r-sm);overflow:hidden;background:linear-gradient(135deg,#2a2a30,#0c0c0e);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.imgcard .prev img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.imgcard .prev .missing{font-size:.82rem;color:var(--text-50);padding:0 16px;text-align:center}
+.imgcard .src{font-size:.78rem;color:var(--text-50);word-break:break-all;margin-bottom:8px}
+.imgcard input[type=file]{width:100%;font-size:.85rem;color:var(--text-70);margin:4px 0 8px}
+.imgcard .row{display:flex;gap:8px;align-items:center}
+.imgcard .row .btn{min-height:36px;padding:0 14px;font-size:.8rem}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#f0f0f0;color:#111;font:500 .9rem var(--font-display);padding:12px 26px;border-radius:var(--r-pill);opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;z-index:60;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+/* lock */
+#lock{position:fixed;inset:0;z-index:50;background:radial-gradient(70% 60% at 50% 30%,#3a1503 0,transparent 70%),var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+#lock .card{background:rgba(255,255,255,.05);border:1px solid var(--line-strong);border-radius:16px;padding:40px 36px;max-width:400px;width:100%;text-align:center;backdrop-filter:blur(10px)}
+#lock h1{font-family:var(--font-display);letter-spacing:-.04em;font-size:1.8rem;margin-bottom:8px}
+#lock p{color:var(--text-60);font-size:.92rem;margin-bottom:20px}
+#lock input{width:100%;font:400 1rem var(--font-body);color:#fff;background:var(--glass);border:1px solid var(--line-strong);border-radius:var(--r-pill);padding:13px 20px;text-align:center;margin-bottom:12px}
+#lock input:focus{outline:none;border-color:#fff}
+#lock .err{color:#ff9d9a;font-size:.85rem;min-height:1.4em;margin-top:8px}
+footer.note{margin-top:40px;color:var(--text-50);font-size:.82rem;text-align:center}
+footer.note b{color:var(--text-70)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div id="lock">
+  <div class="card">
+    <h1>Pintame Dashboard</h1>
+    <p>Enter the passcode to edit site content.</p>
+    <input type="password" id="pass" placeholder="Passcode" autocomplete="off">
+    <button class="btn primary" id="unlock" style="width:100%;justify-content:center">Unlock</button>
+    <div class="err" id="lockerr"></div>
+  </div>
+</div>
+
+<div class="wrap hidden" id="app">
+  <div class="banner">ⓘ <b>Changes apply to THIS browser instantly.</b> Visitors see them only after you
+    <b>Export JSON</b> and send it to your developer to publish.</div>
+
+  <div class="topbar">
+    <h1>Site Dashboard</h1>
+    <div class="actions">
+      <button class="btn primary" id="save">Save</button>
+      <button class="btn" id="export">Export JSON</button>
+      <label class="btn filebtn">Import JSON<input type="file" id="import" accept="application/json,.json"></label>
+      <button class="btn danger" id="reset">Reset all</button>
+      <button class="btn" id="copy">Copy for developer</button>
+      <a class="btn" href="index.html">Open site ↗</a>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button id="tabTexts" class="active">Texts</button>
+    <button id="tabImages">Images</button>
+  </div>
+
+  <div id="textsTab"></div>
+  <div id="imagesTab" class="hidden"><div class="imgs" id="imgGrid"></div></div>
+
+  <footer class="note">Honest note: the passcode gate is <b>obfuscation, not real security</b> — anyone who can
+    open this file can read its source. It only keeps casual visitors out. Overrides live in this browser's
+    <b>localStorage</b> until exported and published by your developer.</footer>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var LS_KEY = 'pintame-overrides-v1';
+  var PASSCODE = 'pintame123';
+
+  /* ---------- lock ---------- */
+  var lock = document.getElementById('lock'), app = document.getElementById('app');
+  function unlock(){ lock.classList.add('hidden'); app.classList.remove('hidden'); init(); }
+  if (sessionStorage.getItem('pintame-dash-ok') === '1'){ unlock(); }
+  document.getElementById('unlock').addEventListener('click', tryPass);
+  document.getElementById('pass').addEventListener('keydown', function(e){ if(e.key === 'Enter') tryPass(); });
+  function tryPass(){
+    var v = document.getElementById('pass').value;
+    if (v === PASSCODE){ sessionStorage.setItem('pintame-dash-ok','1'); unlock(); }
+    else document.getElementById('lockerr').textContent = 'Wrong passcode — try again.';
+  }
+
+  var started = false;
+  function init(){
+    if (started) return; started = true;
+
+    var toast = document.getElementById('toast'), toastT = null;
+    function say(msg){
+      toast.textContent = msg; toast.classList.add('show');
+      clearTimeout(toastT); toastT = setTimeout(function(){ toast.classList.remove('show'); }, 3200);
+    }
+    function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function loadOverrides(){
+      try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') || {}; }
+      catch(e){ return {}; }
+    }
+    var overrides = loadOverrides();   /* key -> string (text or dataURL) */
+    var imgBlobs = {};                  /* key -> {dataUrl, w, h, kb} processed but maybe unsaved */
+
+    /* ---------- tabs ---------- */
+    var tabTexts = document.getElementById('tabTexts'), tabImages = document.getElementById('tabImages');
+    tabTexts.addEventListener('click', function(){
+      tabTexts.classList.add('active'); tabImages.classList.remove('active');
+      document.getElementById('textsTab').classList.remove('hidden');
+      document.getElementById('imagesTab').classList.add('hidden');
+    });
+    tabImages.addEventListener('click', function(){
+      tabImages.classList.add('active'); tabTexts.classList.remove('active');
+      document.getElementById('imagesTab').classList.remove('hidden');
+      document.getElementById('textsTab').classList.add('hidden');
+    });
+
+    /* ---------- load index.html ---------- */
+    var textsTab = document.getElementById('textsTab'), imgGrid = document.getElementById('imgGrid');
+    var textEls = [], imgEls = [];
+    fetch('index.html', {cache:'no-store'}).then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function(html){
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      doc.querySelectorAll('[data-edit]').forEach(function(el){
+        var key = el.getAttribute('data-edit');
+        if(!key) return;
+        if(el.tagName === 'IMG') imgEls.push({key:key, src:el.getAttribute('src')||'', alt:el.getAttribute('alt')||''});
+        else textEls.push({key:key, def:el.textContent.trim()});
+      });
+      renderTexts(); renderImages();
+    }).catch(function(err){
+      textsTab.innerHTML = '<div class="field">Could not load index.html (' + esc(err.message) + '). ' +
+        'Serve this folder over HTTP (e.g. <b>python3 -m http.server</b>) and open dashboard.html from the same server.</div>';
+    });
+
+    /* ---------- texts tab ---------- */
+    function renderTexts(){
+      var groups = {};
+      textEls.forEach(function(f){
+        var p = f.key.split('.')[0];
+        (groups[p] = groups[p] || []).push(f);
+      });
+      var html = '';
+      Object.keys(groups).sort().forEach(function(g){
+        html += '<div class="group"><h2>' + esc(g) + ' <span class="count">' + groups[g].length + '</span></h2>';
+        groups[g].forEach(function(f){
+          var cur = (f.key in overrides) ? overrides[f.key] : f.def;
+          var long = f.def.length > 80;
+          var badge = (f.key in overrides) ? ' <b style="color:#ffd9a8">(edited)</b>' : '';
+          html += '<div class="field" data-key="' + esc(f.key) + '">' +
+            '<label class="key">' + esc(f.key) + badge + '</label>' +
+            '<div class="def">default: ' + esc(f.def.length > 160 ? f.def.slice(0,160) + '…' : f.def) + '</div>' +
+            (long
+              ? '<textarea data-input>' + esc(cur) + '</textarea>'
+              : '<input type="text" data-input value="' + esc(cur) + '">') +
+            '<div class="meta"><span></span><span data-count>' + cur.length + ' chars</span></div>' +
+            '</div>';
+        });
+        html += '</div>';
+      });
+      textsTab.innerHTML = html || '<div class="field">No editable texts found.</div>';
+      textsTab.querySelectorAll('.field').forEach(function(box){
+        var input = box.querySelector('[data-input]'), count = box.querySelector('[data-count]');
+        input.addEventListener('input', function(){ count.textContent = input.value.length + ' chars'; });
+      });
+    }
+
+    /* ---------- images tab ---------- */
+    function renderImages(){
+      imgGrid.innerHTML = '';
+      if(!imgEls.length){ imgGrid.innerHTML = '<div class="field">No editable images found.</div>'; return; }
+      imgEls.forEach(function(im){
+        var card = document.createElement('div');
+        card.className = 'imgcard'; card.dataset.key = im.key;
+        var cur = imgBlobs[im.key] ? imgBlobs[im.key].dataUrl : (overrides[im.key] || im.src);
+        card.innerHTML =
+          '<div class="key">' + esc(im.key) + '</div>' +
+          '<div class="prev">' +
+            (cur
+              ? '<img src="' + esc(cur) + '" alt="" onerror="this.remove()">'
+              : '<div class="missing">no file yet — upload one below</div>') +
+          '</div>' +
+          '<div class="src">current: ' + esc(overrides[im.key] ? 'custom upload (in overrides)' : (im.src || '(none)')) + '</div>' +
+          '<input type="file" accept="image/*">' +
+          '<div class="row"><span data-info style="font-size:.78rem;color:var(--text-50);flex:1">' +
+            (imgBlobs[im.key] ? esc(imgBlobs[im.key].info) + ' — unsaved' : 'max 1600px wide, JPEG 85%' + (im.key.indexOf('character') !== -1 ? ', PNG kept' : '')) +
+          '</span><button class="btn" data-revert>Revert</button></div>';
+        var file = card.querySelector('input[type=file]');
+        file.addEventListener('change', function(){ if(file.files[0]) processFile(im.key, file.files[0], card); });
+        card.querySelector('[data-revert]').addEventListener('click', function(){
+          delete imgBlobs[im.key]; delete overrides[im.key]; persist(); renderImages(); say('Reverted ' + im.key);
+        });
+        imgGrid.appendChild(card);
+      });
+    }
+
+    function processFile(key, file, card){
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function(){
+        URL.revokeObjectURL(url);
+        var keepPng = key.indexOf('character') !== -1;
+        var w = img.naturalWidth, h = img.naturalHeight;
+        var scale = w > 1600 ? 1600 / w : 1;
+        var cw = Math.round(w * scale), ch = Math.round(h * scale);
+        var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+        cv.getContext('2d').drawImage(img, 0, 0, cw, ch);
+        var dataUrl = keepPng ? cv.toDataURL('image/png') : cv.toDataURL('image/jpeg', 0.85);
+        var kb = Math.round(dataUrl.length * 3 / 4 / 1024);
+        imgBlobs[key] = {dataUrl:dataUrl, info: cw + '×' + ch + 'px, ' + kb + ' KB'};
+        overrides[key] = dataUrl;
+        var prev = card.querySelector('.prev');
+        prev.innerHTML = '<img src="' + dataUrl + '" alt="">';
+        card.querySelector('[data-info]').textContent = imgBlobs[key].info + ' — press Save';
+        say('Processed ' + key + ' (' + imgBlobs[key].info + '). Press Save.');
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); say('Could not read that image file.'); };
+      img.src = url;
+    }
+
+    /* ---------- actions ---------- */
+    function collectTexts(){
+      textsTab.querySelectorAll('.field').forEach(function(box){
+        var key = box.dataset.key;
+        var val = box.querySelector('[data-input]').value;
+        var orig = textEls.find(function(f){ return f.key === key; });
+        if(orig && val === orig.def) delete overrides[key];
+        else overrides[key] = val;
+      });
+    }
+    function persist(){ localStorage.setItem(LS_KEY, JSON.stringify(overrides)); }
+
+    document.getElementById('save').addEventListener('click', function(){
+      collectTexts(); persist(); renderTexts(); renderImages();
+      say('Saved to this browser. Export JSON to publish for all visitors.');
+    });
+    document.getElementById('export').addEventListener('click', function(){
+      collectTexts(); persist(); renderTexts();
+      var blob = new Blob([JSON.stringify(overrides, null, 2)], {type:'application/json'});
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'pintame-overrides.json'; a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+      say('Exported pintame-overrides.json — send it to your developer.');
+    });
+    document.getElementById('import').addEventListener('change', function(e){
+      var f = e.target.files[0]; if(!f) return;
+      var r = new FileReader();
+      r.onload = function(){
+        try{
+          var data = JSON.parse(r.result);
+          if(!data || typeof data !== 'object') throw new Error('bad file');
+          Object.keys(data).forEach(function(k){ if(typeof data[k] === 'string') overrides[k] = data[k]; });
+          imgBlobs = {}; persist(); renderTexts(); renderImages(); say('Imported — press Save is not needed, already stored.');
+        }catch(err){ say('Import failed: not a valid overrides JSON.'); }
+      };
+      r.readAsText(f); e.target.value = '';
+    });
+    document.getElementById('reset').addEventListener('click', function(){
+      if(!confirm('Clear ALL overrides in this browser?')) return;
+      overrides = {}; imgBlobs = {}; persist(); renderTexts(); renderImages(); say('All overrides cleared.');
+    });
+    document.getElementById('copy').addEventListener('click', function(){
+      collectTexts();
+      var txt = JSON.stringify(overrides, null, 2);
+      function done(){ say('Copied! Paste it to your developer to bake changes in for ALL visitors.'); }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(done, function(){ fallback(); });
+      } else fallback();
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = txt; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); done(); }catch(e){ say('Copy failed — use Export JSON instead.'); }
+        ta.remove();
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
